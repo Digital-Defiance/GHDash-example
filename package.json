@@ -9,7 +9,7 @@
   },
   "scripts": {
     "db": "node scripts/build-db.mjs",
-    "build": "npm run db && astro build && node scripts/rebase-urls.mjs dist/client",
+    "build": "npm run db && node scripts/studio-assets.mjs && astro build && node scripts/rebase-urls.mjs dist/client",
     "preview": "npx serve dist/client",
     "export-content": "node scripts/db-json.mjs export data.db content"
   },
@@ -17,6 +17,7 @@
     "@astrojs/node": "11.1.5",
     "@astrojs/react": "7.0.0",
     "@emdash-cms/admin": "https://github.com/Digital-Defiance/ghdash/releases/download/pages-v0.1.0/emdash-cms-admin-1.5.0.tgz",
+    "@sqlite.org/sqlite-wasm": "3.50.4-build1",
     "astro": "7.3.2",
     "emdash": "1.5.0",
     "react": "19.2.4",
