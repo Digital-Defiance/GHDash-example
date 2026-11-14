@@ -40,6 +40,10 @@ Schedule a post in the studio and the hourly workflow publishes it once its time
 
 Without `WEBHOOK_URL` the plugin does nothing. The plugin's settings screen in the studio is not used for this: settings and secrets for hooks come from `hooks.config.json` and the Actions secrets, so no secret is ever stored in the repository. The workflow remembers the last commit it processed in a tag called `hooks-last`, so a cancelled run is caught up by the next one.
 
+## 7. Optional: plugin cron jobs
+
+A plugin entry in `hooks.config.json` can list `cron` jobs, for example `"cron": [{ "name": "weekly-digest", "schedule": "0 9 * * 1" }]` (UTC, five fields, or `@hourly`, `@daily`, `@weekly`). The hourly workflow runs the plugin's `cron` hook for each job that fell due since the last run, so a job fires within about an hour of its time. Only plugins whose hooks work without a server, content access or public routes can run here.
+
 ## Keep it current
 
 The admin and browser API come from release assets named in `package.json`. To upgrade, change those URLs to a newer `pages-v*` release and run `npm install`.

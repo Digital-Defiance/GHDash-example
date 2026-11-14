@@ -118,3 +118,30 @@ jobs:
           npx ghdash-pages run-hooks --base "$base" --head HEAD
           git tag -f hooks-last HEAD
           git push --force origin refs/tags/hooks-last
+
+  cron:
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Run plugin cron jobs that fell due since the last run
+        env:
+          WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
+          WEBHOOK_TOKEN: ${{ secrets.WEBHOOK_TOKEN }}
+        run: |
+          grep -q '"cron"' hooks.config.json 2>/dev/null || { echo "No cron jobs in hooks.config.json, nothing to run."; exit 0; }
+          git fetch --force origin "refs/tags/cron-last:refs/tags/cron-last" 2>/dev/null || true
+          since=$(git for-each-ref refs/tags/cron-last --format='%(creatordate:iso-strict)')
+          now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          npx ghdash-pages run-cron ${since:+--since "$since"} --now "$now"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -f -a cron-last -m "$now" HEAD
+          git push --force origin refs/tags/cron-last
