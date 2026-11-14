@@ -1,0 +1,38 @@
+name: Cron smoke test
+
+# Proves, on a real runner and with the adapter installed from npm, that `ghdash-pages run-cron` finds a plugin's cron job and runs its hook.
+# Run it from the Actions tab (workflow_dispatch) after changing the adapter version.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  cron:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Run a fixture plugin's hourly job through the adapter
+        run: |
+          bin="$GITHUB_WORKSPACE/node_modules/@digitaldefiance/ghdash-pages/bin/ghdash-pages.mjs"
+          dir="$(mktemp -d)"
+          cd "$dir"
+          echo '{}' > package.json
+          cat > plugin.mjs <<'JS'
+          export default { hooks: { cron: async (event, ctx) => console.log(`CRON-RAN ${ctx.plugin.id} ${event.name} ${event.scheduledAt}`) } };
+          JS
+          cat > hooks.config.json <<'JSON'
+          { "site": { "name": "smoke", "url": "https://example.test/" },
+            "plugins": [{ "id": "smoke", "module": "./plugin.mjs", "cron": [{ "name": "tick", "schedule": "@hourly" }] }] }
+          JSON
+          out="$(node "$bin" run-cron --since 2026-01-01T00:10:00Z --now 2026-01-01T02:10:00Z)"
+          echo "$out"
+          test "$(echo "$out" | grep -c '^CRON-RAN smoke tick')" = "2"
+          echo "$out" | grep -q 'ran 2 cron call(s), 0 failed'
