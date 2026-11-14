@@ -44,6 +44,16 @@ The admin and the browser API are installed from the `pages-v*` release assets o
 
 Limits: schema changes (new content types or fields) can be committed but not merged or discarded, media upload is untested, and users, passkeys and other server-only screens do nothing here. Run `npm test` for unit tests and `npm run test:e2e` for the browser suite.
 
+## Comments (giscus)
+
+Posts show a [giscus](https://giscus.app) discussion thread when `giscus.json` exists. Commenters need a GitHub account. To turn it on:
+
+1. Enable Discussions on the repository and install the [giscus app](https://github.com/apps/giscus).
+2. Open giscus.app, enter the repository, pick a category, and copy `data-repo-id` and `data-category-id`.
+3. Copy `giscus.example.json` to `giscus.json`, fill in the four values, and commit it.
+
+Without `giscus.json` there is no comment section.
+
 ## Known gaps (see TODO.md Phases 1 to 3)
 
 - The search page is not available yet. It needs Pagefind.
