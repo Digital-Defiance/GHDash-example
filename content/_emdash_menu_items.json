@@ -1,0 +1,53 @@
+[
+	{
+		"created_at": "2026-11-14T00:01:42.053Z",
+		"css_classes": null,
+		"custom_url": "/pages/about",
+		"id": "01M7BNR8N56YTXXXWK39Y0EMD7",
+		"label": "About",
+		"locale": "en",
+		"menu_id": "01M7BNR8N4444YN7A70KC4CHVC",
+		"parent_id": null,
+		"reference_collection": null,
+		"reference_id": null,
+		"sort_order": 1,
+		"target": null,
+		"title_attr": null,
+		"translation_group": "01M7BNR8N56YTXXXWK39Y0EMD7",
+		"type": "custom"
+	},
+	{
+		"created_at": "2026-11-14T00:01:42.053Z",
+		"css_classes": null,
+		"custom_url": "/posts",
+		"id": "01M7BNR8N5DP5AFY27PY4F0F8H",
+		"label": "Posts",
+		"locale": "en",
+		"menu_id": "01M7BNR8N4444YN7A70KC4CHVC",
+		"parent_id": null,
+		"reference_collection": null,
+		"reference_id": null,
+		"sort_order": 2,
+		"target": null,
+		"title_attr": null,
+		"translation_group": "01M7BNR8N5DP5AFY27PY4F0F8H",
+		"type": "custom"
+	},
+	{
+		"created_at": "2026-11-14T00:01:42.053Z",
+		"css_classes": null,
+		"custom_url": "/",
+		"id": "01M7BNR8N5WBY75ES1QHDR1196",
+		"label": "Home",
+		"locale": "en",
+		"menu_id": "01M7BNR8N4444YN7A70KC4CHVC",
+		"parent_id": null,
+		"reference_collection": null,
+		"reference_id": null,
+		"sort_order": 0,
+		"target": null,
+		"title_attr": null,
+		"translation_group": "01M7BNR8N5WBY75ES1QHDR1196",
+		"type": "custom"
+	}
+]

@@ -1,0 +1,79 @@
+[
+	{
+		"data": null,
+		"id": "01M7BNR8GF4MZY1QAVD30WE291",
+		"label": "Development",
+		"locale": "en",
+		"name": "category",
+		"parent_id": null,
+		"slug": "development",
+		"sort_order": 0,
+		"translation_group": "01M7BNR8GF4MZY1QAVD30WE291"
+	},
+	{
+		"data": null,
+		"id": "01M7BNR8GH081WMA7RM5PZB1KH",
+		"label": "Notes",
+		"locale": "en",
+		"name": "category",
+		"parent_id": null,
+		"slug": "notes",
+		"sort_order": 2,
+		"translation_group": "01M7BNR8GH081WMA7RM5PZB1KH"
+	},
+	{
+		"data": null,
+		"id": "01M7BNR8GHHAY4R7ZM3K2EYW5A",
+		"label": "Design",
+		"locale": "en",
+		"name": "category",
+		"parent_id": null,
+		"slug": "design",
+		"sort_order": 1,
+		"translation_group": "01M7BNR8GHHAY4R7ZM3K2EYW5A"
+	},
+	{
+		"data": null,
+		"id": "01M7BNR8GM006Z4VD2J233RKJF",
+		"label": "Opinion",
+		"locale": "en",
+		"name": "tag",
+		"parent_id": null,
+		"slug": "opinion",
+		"sort_order": 1,
+		"translation_group": "01M7BNR8GM006Z4VD2J233RKJF"
+	},
+	{
+		"data": null,
+		"id": "01M7BNR8GMS9BGA8EZKJ3C8CBC",
+		"label": "Web Development",
+		"locale": "en",
+		"name": "tag",
+		"parent_id": null,
+		"slug": "webdev",
+		"sort_order": 0,
+		"translation_group": "01M7BNR8GMS9BGA8EZKJ3C8CBC"
+	},
+	{
+		"data": null,
+		"id": "01M7BNR8GN0CR5NGTC340MVS4G",
+		"label": "Tools",
+		"locale": "en",
+		"name": "tag",
+		"parent_id": null,
+		"slug": "tools",
+		"sort_order": 2,
+		"translation_group": "01M7BNR8GN0CR5NGTC340MVS4G"
+	},
+	{
+		"data": null,
+		"id": "01M7BNR8GN21H361Y8M532EPVY",
+		"label": "Creativity",
+		"locale": "en",
+		"name": "tag",
+		"parent_id": null,
+		"slug": "creativity",
+		"sort_order": 3,
+		"translation_group": "01M7BNR8GN21H361Y8M532EPVY"
+	}
+]

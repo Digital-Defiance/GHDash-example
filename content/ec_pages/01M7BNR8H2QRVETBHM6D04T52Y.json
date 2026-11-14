@@ -1,0 +1,19 @@
+{
+	"author_id": null,
+	"content": "[{\"_type\":\"block\",\"style\":\"normal\",\"children\":[{\"_type\":\"span\",\"text\":\"A place for writing about software, design, and the occasional stray thought. No posting schedule, no newsletter funnel. Just things I wanted to write down.\",\"_key\":\"k1\"}],\"_key\":\"k0\"},{\"_type\":\"block\",\"style\":\"normal\",\"children\":[{\"_type\":\"span\",\"text\":\"Built with Astro and EmDash. The source is open if you want to see how it works.\",\"_key\":\"k3\"}],\"_key\":\"k2\"}]",
+	"created_at": "2026-11-14T00:01:41.923Z",
+	"deleted_at": null,
+	"draft_revision_id": null,
+	"id": "01M7BNR8H2QRVETBHM6D04T52Y",
+	"live_revision_id": "01M7BNR8H129KVM4FVZ7M2Y6Z3",
+	"locale": "en",
+	"primary_byline_id": null,
+	"published_at": "2026-11-14T00:01:41.922Z",
+	"scheduled_at": null,
+	"slug": "about",
+	"status": "published",
+	"title": "About",
+	"translation_group": "01M7BNR8H2QRVETBHM6D04T52Y",
+	"updated_at": "2026-11-14T00:01:41.926Z",
+	"version": 2
+}

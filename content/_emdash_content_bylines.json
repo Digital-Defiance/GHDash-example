@@ -1,0 +1,29 @@
+[
+	{
+		"byline_id": "01M7BNR8GZDT0EBHCQV2N005RZ",
+		"collection_slug": "posts",
+		"content_id": "01M7BNR8KFJHMJN9FBNW6SXPWM",
+		"created_at": "2026-11-14T00:01:42.001Z",
+		"id": "01M7BNR8KHWFMV86698DJ5FCTY",
+		"role_label": "Guest essay",
+		"sort_order": 1
+	},
+	{
+		"byline_id": "01M7BNR8GWBQTQCTVQ19HP9T78",
+		"collection_slug": "posts",
+		"content_id": "01M7BNR8KFJHMJN9FBNW6SXPWM",
+		"created_at": "2026-11-14T00:01:42.001Z",
+		"id": "01M7BNR8KHZYV9Y7HJ7DVHNFKQ",
+		"role_label": null,
+		"sort_order": 0
+	},
+	{
+		"byline_id": "01M7BNR8GWBQTQCTVQ19HP9T78",
+		"collection_slug": "posts",
+		"content_id": "01M7BNR8KWVB8ZYGW1G86J148V",
+		"created_at": "2026-11-14T00:01:42.013Z",
+		"id": "01M7BNR8KXE1F42ARX95R4S8X3",
+		"role_label": null,
+		"sort_order": 0
+	}
+]

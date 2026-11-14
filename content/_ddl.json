@@ -1,0 +1,212 @@
+[
+	{
+		"type": "index",
+		"name": "idx_ec_pages_author",
+		"sql": "CREATE INDEX \"idx_ec_pages_author\"\n\t\t\tON \"ec_pages\" (author_id)\n\t\t"
+	},
+	{
+		"type": "index",
+		"name": "idx_ec_pages_del_sched",
+		"sql": "CREATE INDEX \"idx_ec_pages_del_sched\"\n\t\t\tON \"ec_pages\" (deleted_at, scheduled_at)\n\t\t\tWHERE scheduled_at IS NOT NULL\n\t\t"
+	},
+	{
+		"type": "index",
+		"name": "idx_ec_pages_del_tg_locale",
+		"sql": "CREATE INDEX \"idx_ec_pages_del_tg_locale\"\n\t\t\tON \"ec_pages\" (deleted_at, translation_group, locale)\n\t\t"
+	},
+	{
+		"type": "index",
+		"name": "idx_ec_pages_deleted_created_id",
+		"sql": "CREATE INDEX \"idx_ec_pages_deleted_created_id\"\n\t\t\tON \"ec_pages\" (deleted_at, created_at DESC, id DESC)\n\t\t"
+	},
+	{
+		"type": "index",
+		"name": "idx_ec_pages_deleted_published_id",
+		"sql": "CREATE INDEX \"idx_ec_pages_deleted_published_id\"\n\t\t\tON \"ec_pages\" (deleted_at, published_at DESC, id DESC)\n\t\t"
+	},
+	{
+		"type": "index",
+		"name": "idx_ec_pages_deleted_status",
+		"sql": "CREATE INDEX \"idx_ec_pages_deleted_status\"\n\t\t\tON \"ec_pages\" (deleted_at, status)\n\t\t"
+	},
+	{
+		"type": "index",
+		"name": "idx_ec_pages_deleted_updated_id",
+		"sql": "CREATE INDEX \"idx_ec_pages_deleted_updated_id\"\n\t\t\tON \"ec_pages\" (deleted_at, updated_at DESC, id DESC)\n\t\t"
+	},
+	{
+		"type": "index",
+		"name": "idx_ec_pages_draft_revision",
+		"sql": "CREATE INDEX \"idx_ec_pages_draft_revision\"\n\t\t\tON \"ec_pages\" (draft_revision_id)\n\t\t"
+	},
+	{
+		"type": "index",
+		"name": "idx_ec_pages_live_revision",
+		"sql": "CREATE INDEX \"idx_ec_pages_live_revision\"\n\t\t\tON \"ec_pages\" (live_revision_id)\n\t\t"
+	},
+	{
+		"type": "index",
+		"name": "idx_ec_pages_loc_crt",
+		"sql": "CREATE INDEX \"idx_ec_pages_loc_crt\"\n\t\t\tON \"ec_pages\" (deleted_at, locale, created_at DESC, id DESC)\n\t\t"
+	},
+	{
+		"type": "index",
+		"name": "idx_ec_pages_loc_upd",
+		"sql": "CREATE INDEX \"idx_ec_pages_loc_upd\"\n\t\t\tON \"ec_pages\" (deleted_at, locale, updated_at DESC, id DESC)\n\t\t"
+	},
+	{
+		"type": "index",
+		"name": "idx_ec_pages_locale",
+		"sql": "CREATE INDEX \"idx_ec_pages_locale\"\n\t\t\tON \"ec_pages\" (locale)\n\t\t"
+	},
+	{
+		"type": "index",
+		"name": "idx_ec_pages_primary_byline",
+		"sql": "CREATE INDEX \"idx_ec_pages_primary_byline\"\n\t\t\tON \"ec_pages\" (primary_byline_id)\n\t\t"
+	},
+	{
+		"type": "index",
+		"name": "idx_ec_pages_slug",
+		"sql": "CREATE INDEX \"idx_ec_pages_slug\"\n\t\t\tON \"ec_pages\" (slug)\n\t\t"
+	},
+	{
+		"type": "index",
+		"name": "idx_ec_pages_tg_locale",
+		"sql": "CREATE INDEX \"idx_ec_pages_tg_locale\"\n\t\t\tON \"ec_pages\" (translation_group, locale)\n\t\t"
+	},
+	{
+		"type": "index",
+		"name": "idx_ec_posts_author",
+		"sql": "CREATE INDEX \"idx_ec_posts_author\"\n\t\t\tON \"ec_posts\" (author_id)\n\t\t"
+	},
+	{
+		"type": "index",
+		"name": "idx_ec_posts_del_sched",
+		"sql": "CREATE INDEX \"idx_ec_posts_del_sched\"\n\t\t\tON \"ec_posts\" (deleted_at, scheduled_at)\n\t\t\tWHERE scheduled_at IS NOT NULL\n\t\t"
+	},
+	{
+		"type": "index",
+		"name": "idx_ec_posts_del_tg_locale",
+		"sql": "CREATE INDEX \"idx_ec_posts_del_tg_locale\"\n\t\t\tON \"ec_posts\" (deleted_at, translation_group, locale)\n\t\t"
+	},
+	{
+		"type": "index",
+		"name": "idx_ec_posts_deleted_created_id",
+		"sql": "CREATE INDEX \"idx_ec_posts_deleted_created_id\"\n\t\t\tON \"ec_posts\" (deleted_at, created_at DESC, id DESC)\n\t\t"
+	},
+	{
+		"type": "index",
+		"name": "idx_ec_posts_deleted_published_id",
+		"sql": "CREATE INDEX \"idx_ec_posts_deleted_published_id\"\n\t\t\tON \"ec_posts\" (deleted_at, published_at DESC, id DESC)\n\t\t"
+	},
+	{
+		"type": "index",
+		"name": "idx_ec_posts_deleted_status",
+		"sql": "CREATE INDEX \"idx_ec_posts_deleted_status\"\n\t\t\tON \"ec_posts\" (deleted_at, status)\n\t\t"
+	},
+	{
+		"type": "index",
+		"name": "idx_ec_posts_deleted_updated_id",
+		"sql": "CREATE INDEX \"idx_ec_posts_deleted_updated_id\"\n\t\t\tON \"ec_posts\" (deleted_at, updated_at DESC, id DESC)\n\t\t"
+	},
+	{
+		"type": "index",
+		"name": "idx_ec_posts_draft_revision",
+		"sql": "CREATE INDEX \"idx_ec_posts_draft_revision\"\n\t\t\tON \"ec_posts\" (draft_revision_id)\n\t\t"
+	},
+	{
+		"type": "index",
+		"name": "idx_ec_posts_live_revision",
+		"sql": "CREATE INDEX \"idx_ec_posts_live_revision\"\n\t\t\tON \"ec_posts\" (live_revision_id)\n\t\t"
+	},
+	{
+		"type": "index",
+		"name": "idx_ec_posts_loc_crt",
+		"sql": "CREATE INDEX \"idx_ec_posts_loc_crt\"\n\t\t\tON \"ec_posts\" (deleted_at, locale, created_at DESC, id DESC)\n\t\t"
+	},
+	{
+		"type": "index",
+		"name": "idx_ec_posts_loc_upd",
+		"sql": "CREATE INDEX \"idx_ec_posts_loc_upd\"\n\t\t\tON \"ec_posts\" (deleted_at, locale, updated_at DESC, id DESC)\n\t\t"
+	},
+	{
+		"type": "index",
+		"name": "idx_ec_posts_locale",
+		"sql": "CREATE INDEX \"idx_ec_posts_locale\"\n\t\t\tON \"ec_posts\" (locale)\n\t\t"
+	},
+	{
+		"type": "index",
+		"name": "idx_ec_posts_primary_byline",
+		"sql": "CREATE INDEX \"idx_ec_posts_primary_byline\"\n\t\t\tON \"ec_posts\" (primary_byline_id)\n\t\t"
+	},
+	{
+		"type": "index",
+		"name": "idx_ec_posts_slug",
+		"sql": "CREATE INDEX \"idx_ec_posts_slug\"\n\t\t\tON \"ec_posts\" (slug)\n\t\t"
+	},
+	{
+		"type": "index",
+		"name": "idx_ec_posts_tg_locale",
+		"sql": "CREATE INDEX \"idx_ec_posts_tg_locale\"\n\t\t\tON \"ec_posts\" (translation_group, locale)\n\t\t"
+	},
+	{
+		"type": "index",
+		"name": "uidx_ec_pages_active_tg_locale",
+		"sql": "CREATE UNIQUE INDEX \"uidx_ec_pages_active_tg_locale\"\n\t\t\tON \"ec_pages\" (translation_group, lower(locale))\n\t\t\tWHERE deleted_at IS NULL AND translation_group IS NOT NULL\n\t\t"
+	},
+	{
+		"type": "index",
+		"name": "uidx_ec_posts_active_tg_locale",
+		"sql": "CREATE UNIQUE INDEX \"uidx_ec_posts_active_tg_locale\"\n\t\t\tON \"ec_posts\" (translation_group, lower(locale))\n\t\t\tWHERE deleted_at IS NULL AND translation_group IS NOT NULL\n\t\t"
+	},
+	{
+		"type": "table",
+		"name": "_emdash_fts_pages",
+		"sql": "CREATE VIRTUAL TABLE \"_emdash_fts_pages\" USING fts5(\n\t\t\t\tid UNINDEXED, locale UNINDEXED, title, content,\n\t\t\t\ttokenize='porter unicode61'\n\t\t\t)"
+	},
+	{
+		"type": "table",
+		"name": "_emdash_fts_posts",
+		"sql": "CREATE VIRTUAL TABLE \"_emdash_fts_posts\" USING fts5(\n\t\t\t\tid UNINDEXED, locale UNINDEXED, title, content,\n\t\t\t\ttokenize='porter unicode61'\n\t\t\t)"
+	},
+	{
+		"type": "table",
+		"name": "ec_pages",
+		"sql": "CREATE TABLE \"ec_pages\" (\"id\" text primary key, \"slug\" text, \"status\" text default 'draft', \"author_id\" text, \"primary_byline_id\" text, \"created_at\" text default (datetime('now')), \"updated_at\" text default (datetime('now')), \"published_at\" text, \"scheduled_at\" text, \"deleted_at\" text, \"version\" integer default 1, \"live_revision_id\" text references \"revisions\" (\"id\"), \"draft_revision_id\" text references \"revisions\" (\"id\"), \"locale\" text default 'en' not null, \"translation_group\" text, \"title\" text default '' not null, \"content\" json, constraint \"ec_pages_slug_locale_unique\" unique (\"slug\", \"locale\"))"
+	},
+	{
+		"type": "table",
+		"name": "ec_posts",
+		"sql": "CREATE TABLE \"ec_posts\" (\"id\" text primary key, \"slug\" text, \"status\" text default 'draft', \"author_id\" text, \"primary_byline_id\" text, \"created_at\" text default (datetime('now')), \"updated_at\" text default (datetime('now')), \"published_at\" text, \"scheduled_at\" text, \"deleted_at\" text, \"version\" integer default 1, \"live_revision_id\" text references \"revisions\" (\"id\"), \"draft_revision_id\" text references \"revisions\" (\"id\"), \"locale\" text default 'en' not null, \"translation_group\" text, \"title\" text default '' not null, \"featured_image\" text, \"content\" json, \"excerpt\" text, constraint \"ec_posts_slug_locale_unique\" unique (\"slug\", \"locale\"))"
+	},
+	{
+		"type": "trigger",
+		"name": "_emdash_fts_pages_delete",
+		"sql": "CREATE TRIGGER \"_emdash_fts_pages_delete\"\n\t\t\tAFTER DELETE ON \"ec_pages\"\n\t\t\tBEGIN\n\t\t\t\tDELETE FROM \"_emdash_fts_pages\" WHERE rowid = OLD.rowid;\n\t\t\tEND"
+	},
+	{
+		"type": "trigger",
+		"name": "_emdash_fts_pages_insert",
+		"sql": "CREATE TRIGGER \"_emdash_fts_pages_insert\"\n\t\t\tAFTER INSERT ON \"ec_pages\"\n\t\t\tWHEN NEW.deleted_at IS NULL\n\t\t\tBEGIN\n\t\t\t\tINSERT OR REPLACE INTO \"_emdash_fts_pages\"(rowid, id, locale, title, content)\n\t\t\t\tVALUES (NEW.rowid, NEW.id, NEW.locale, NEW.title, CASE WHEN NEW.content IS NULL THEN NULL WHEN json_valid(NEW.content) AND json_type(NEW.content) IN ('array', 'object') THEN (SELECT group_concat(j.value, ' ') FROM json_tree(NEW.content) AS j WHERE j.key IN ('text', 'alt', 'caption', 'code') AND j.type = 'text') ELSE NEW.content END);\n\t\t\tEND"
+	},
+	{
+		"type": "trigger",
+		"name": "_emdash_fts_pages_update",
+		"sql": "CREATE TRIGGER \"_emdash_fts_pages_update\"\n\t\t\tAFTER UPDATE ON \"ec_pages\"\n\t\t\tWHEN OLD.deleted_at IS NOT NEW.deleted_at OR OLD.locale IS NOT NEW.locale OR OLD.title IS NOT NEW.title OR OLD.content IS NOT NEW.content\n\t\t\tBEGIN\n\t\t\t\tDELETE FROM \"_emdash_fts_pages\" WHERE rowid = OLD.rowid;\n\t\t\t\tINSERT INTO \"_emdash_fts_pages\"(rowid, id, locale, title, content)\n\t\t\t\tSELECT NEW.rowid, NEW.id, NEW.locale, NEW.title, CASE WHEN NEW.content IS NULL THEN NULL WHEN json_valid(NEW.content) AND json_type(NEW.content) IN ('array', 'object') THEN (SELECT group_concat(j.value, ' ') FROM json_tree(NEW.content) AS j WHERE j.key IN ('text', 'alt', 'caption', 'code') AND j.type = 'text') ELSE NEW.content END\n\t\t\t\tWHERE NEW.deleted_at IS NULL;\n\t\t\tEND"
+	},
+	{
+		"type": "trigger",
+		"name": "_emdash_fts_posts_delete",
+		"sql": "CREATE TRIGGER \"_emdash_fts_posts_delete\"\n\t\t\tAFTER DELETE ON \"ec_posts\"\n\t\t\tBEGIN\n\t\t\t\tDELETE FROM \"_emdash_fts_posts\" WHERE rowid = OLD.rowid;\n\t\t\tEND"
+	},
+	{
+		"type": "trigger",
+		"name": "_emdash_fts_posts_insert",
+		"sql": "CREATE TRIGGER \"_emdash_fts_posts_insert\"\n\t\t\tAFTER INSERT ON \"ec_posts\"\n\t\t\tWHEN NEW.deleted_at IS NULL\n\t\t\tBEGIN\n\t\t\t\tINSERT OR REPLACE INTO \"_emdash_fts_posts\"(rowid, id, locale, title, content)\n\t\t\t\tVALUES (NEW.rowid, NEW.id, NEW.locale, NEW.title, CASE WHEN NEW.content IS NULL THEN NULL WHEN json_valid(NEW.content) AND json_type(NEW.content) IN ('array', 'object') THEN (SELECT group_concat(j.value, ' ') FROM json_tree(NEW.content) AS j WHERE j.key IN ('text', 'alt', 'caption', 'code') AND j.type = 'text') ELSE NEW.content END);\n\t\t\tEND"
+	},
+	{
+		"type": "trigger",
+		"name": "_emdash_fts_posts_update",
+		"sql": "CREATE TRIGGER \"_emdash_fts_posts_update\"\n\t\t\tAFTER UPDATE ON \"ec_posts\"\n\t\t\tWHEN OLD.deleted_at IS NOT NEW.deleted_at OR OLD.locale IS NOT NEW.locale OR OLD.title IS NOT NEW.title OR OLD.content IS NOT NEW.content\n\t\t\tBEGIN\n\t\t\t\tDELETE FROM \"_emdash_fts_posts\" WHERE rowid = OLD.rowid;\n\t\t\t\tINSERT INTO \"_emdash_fts_posts\"(rowid, id, locale, title, content)\n\t\t\t\tSELECT NEW.rowid, NEW.id, NEW.locale, NEW.title, CASE WHEN NEW.content IS NULL THEN NULL WHEN json_valid(NEW.content) AND json_type(NEW.content) IN ('array', 'object') THEN (SELECT group_concat(j.value, ' ') FROM json_tree(NEW.content) AS j WHERE j.key IN ('text', 'alt', 'caption', 'code') AND j.type = 'text') ELSE NEW.content END\n\t\t\t\tWHERE NEW.deleted_at IS NULL;\n\t\t\tEND"
+	}
+]
