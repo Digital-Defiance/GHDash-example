@@ -22,12 +22,14 @@ const [sqlite, content, empty] = await Promise.all([
 const { db: raw, database, freshNames } = openDb(sqlite, empty, content);
 const db = new Kysely({ dialect: new SqliteDialect({ database }) });
 const realFetch = globalThis.fetch.bind(globalThis);
-const controller = createController({ db: raw, freshNames, baseFiles: snapshot(raw, freshNames), meta: content.meta });
+const pendingMedia = new Map();
+const controller = createController({ db: raw, freshNames, baseFiles: snapshot(raw, freshNames), meta: content.meta, pendingMedia });
 const rawApi = createBrowserApi({
 	db,
 	apiBase: paths.apiBase,
 	user: { id: "github-user", email: "editor@users.noreply.github.com", name: "GitHub editor" },
 	passthrough: realFetch,
+	pendingMedia,
 });
 const api: typeof fetch = async (input, init) => {
 	const res = await rawApi(input, init);
