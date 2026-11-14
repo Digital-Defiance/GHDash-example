@@ -56,6 +56,8 @@ Static sites have no server to receive a form, so the form posts to a service. N
 2. Copy `contact.example.json` to `contact.json`, put the address in `endpoint`, and commit it. The site then has a `/contact` page. Without `contact.json` there is no page.
 3. Link to `/contact` from your menu in the studio.
 
+Or, to stay entirely on GitHub, set `issueRepo` instead of `endpoint` in `contact.json`, for example `{ "issueRepo": "your-name/your-repo" }`. The page then asks for a subject and message and opens a pre-filled **public** GitHub issue (labelled `contact`, change it with `issueLabel`). Visitors need a GitHub account, and anyone can read what they write, so this suits questions and feedback rather than private messages.
+
 To use your own Worker (free Cloudflare plan, email through a free Resend account):
 
 1. Copy `worker/wrangler.example.toml` to `worker/wrangler.toml` and fill in your site's address (`https://your-name.github.io`, no path), the address that receives mail and the sender address from a domain you verified in Resend.

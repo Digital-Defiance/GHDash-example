@@ -21,6 +21,16 @@ test("an https endpoint turns the form on; no file, bad JSON, http and the place
 	assert.equal(getContact(file({ endpoint: "https://example.com/replace-with-your-form-endpoint" })), null);
 });
 
+test("an issueRepo turns on the GitHub issue form; a placeholder or malformed repo does not", () => {
+	assert.deepEqual(
+		{ ...getContact(file({ issueRepo: "me/my-site" })) },
+		{ kind: "issue", repo: "me/my-site", label: "contact", subject: "", turnstileSiteKey: "", endpoint: "" },
+	);
+	assert.equal(getContact(file({ issueRepo: "your-name/your-repo" })), null);
+	assert.equal(getContact(file({ issueRepo: "not a repo" })), null);
+	assert.equal(getContact(file({ endpoint: "https://formspree.io/f/abc" })).kind, "form");
+});
+
 const env = { ALLOWED_ORIGIN: "https://me.github.io", TO_EMAIL: "me@x.test", FROM_EMAIL: "Form <f@x.test>", RESEND_API_KEY: "k" };
 const post = (body, headers = {}) =>
 	new Request("https://worker.test/", {

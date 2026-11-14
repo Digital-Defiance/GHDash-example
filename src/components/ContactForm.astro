@@ -1,13 +1,33 @@
 ---
 interface Props {
-	endpoint: string;
+	kind?: "form" | "issue";
+	repo?: string;
+	label?: string;
+	endpoint?: string;
 	subject?: string;
 	turnstileSiteKey?: string;
 }
 
-const { endpoint, subject = "", turnstileSiteKey = "" } = Astro.props;
+const { kind = "form", repo = "", label = "contact", endpoint = "", subject = "", turnstileSiteKey = "" } = Astro.props;
 ---
 
+{kind === "issue" ? (
+	<form class="contact" method="get" action={`https://github.com/${repo}/issues/new`} target="_blank" rel="noopener">
+		<p class="contact__note">
+			Your message opens as a <strong>public</strong> GitHub issue on {repo}. You need a GitHub account, and anyone can read it. Don't include private details.
+		</p>
+		<input type="hidden" name="labels" value={label} />
+		<label class="contact__field">
+			<span>Subject</span>
+			<input type="text" name="title" required maxlength="200" />
+		</label>
+		<label class="contact__field">
+			<span>Message</span>
+			<textarea name="body" required rows="6" maxlength="5000"></textarea>
+		</label>
+		<button type="submit" class="btn">Continue on GitHub</button>
+	</form>
+) : (
 <form class="contact" method="post" action={endpoint} data-contact>
 	{subject && <input type="hidden" name="subject" value={subject} />}
 	<p class="contact__trap" aria-hidden="true">
@@ -34,6 +54,7 @@ const { endpoint, subject = "", turnstileSiteKey = "" } = Astro.props;
 	<button type="submit" class="btn">Send message</button>
 	<p class="contact__status" role="status" aria-live="polite" data-contact-status></p>
 </form>
+)}
 
 <script>
 	for (const form of document.querySelectorAll<HTMLFormElement>("form[data-contact]")) {
@@ -69,6 +90,10 @@ const { endpoint, subject = "", turnstileSiteKey = "" } = Astro.props;
 		display: grid;
 		gap: var(--spacing-4);
 		max-width: 36rem;
+	}
+	.contact__note {
+		margin: 0;
+		color: var(--color-text-secondary);
 	}
 	.contact__trap {
 		position: absolute;
