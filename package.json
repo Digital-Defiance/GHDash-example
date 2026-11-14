@@ -29,7 +29,7 @@
     "react-dom": "19.2.4"
   },
   "devDependencies": {
-    "@digital-defiance/ghdash-pages": "https://github.com/Digital-Defiance/ghdash/releases/download/pages-v0.15.0/digital-defiance-ghdash-pages-0.10.0.tgz",
+    "@digital-defiance/ghdash-pages": "https://github.com/Digital-Defiance/ghdash/releases/download/pages-v0.16.0/digital-defiance-ghdash-pages-0.11.0.tgz",
     "@emdash-cms/plugin-webhook-notifier": "^0.2.3",
     "@playwright/test": "^1.63.0",
     "lightningcss": "1.33.0",
