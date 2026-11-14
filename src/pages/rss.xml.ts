@@ -2,6 +2,7 @@ import type { APIRoute } from "astro";
 import { getEmDashCollection, getSiteSettings } from "emdash";
 
 import { getSiteLocale } from "../utils/locale";
+import { siteUrl as siteUrlFor } from "../utils/site-url";
 import { resolveBlogSiteIdentity } from "../utils/site-identity";
 
 export const GET: APIRoute = async ({ site, url }) => {
@@ -18,7 +19,7 @@ export const GET: APIRoute = async ({ site, url }) => {
 			if (!post.data.publishedAt) return null;
 			const pubDate = post.data.publishedAt.toUTCString();
 
-			const postUrl = new URL(`/posts/${post.id}`, siteUrl).href;
+			const postUrl = siteUrlFor(siteUrl, `/posts/${post.id}/`);
 			const title = escapeXml(post.data.title || "Untitled");
 			const description = escapeXml(post.data.excerpt || "");
 
@@ -38,8 +39,8 @@ export const GET: APIRoute = async ({ site, url }) => {
   <channel>
     <title>${escapeXml(siteTitle)}</title>
     <description>${escapeXml(siteTagline)}</description>
-	<link>${siteUrl.href}</link>
-	<atom:link href="${new URL("/rss.xml", siteUrl).href}" rel="self" type="application/rss+xml"/>
+	<link>${siteUrlFor(siteUrl, "/")}</link>
+	<atom:link href="${siteUrlFor(siteUrl, "/rss.xml")}" rel="self" type="application/rss+xml"/>
     <language>${getSiteLocale() ?? "en-us"}</language>
     <lastBuildDate>${new Date().toUTCString()}</lastBuildDate>
 ${items}

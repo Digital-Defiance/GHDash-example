@@ -55,4 +55,17 @@ test.describe("static site", () => {
 		await page.goto("search/?q=zzzzqqqq");
 		await expect(page.getByText(/No results for/)).toBeVisible();
 	});
+
+	test("sitemap, robots and the feed use absolute URLs under the base path", async ({ request, baseURL }) => {
+		const origin = new URL(baseURL!).origin;
+		const sitemap = await (await request.get("sitemap.xml")).text();
+		const locs = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]!);
+		expect(locs.length).toBeGreaterThan(3);
+		for (const l of locs) expect(l.startsWith(`${origin}/GHDash-example/`), l).toBe(true);
+		const robots = await (await request.get("robots.txt")).text();
+		expect(robots).toContain(`Sitemap: ${origin}/GHDash-example/sitemap.xml`);
+		expect(robots).toContain("Disallow: /studio/");
+		const rss = await (await request.get("rss.xml")).text();
+		expect(rss).toMatch(/<link>[^<]*\/GHDash-example\/posts\/[^<]+<\/link>/);
+	});
 });

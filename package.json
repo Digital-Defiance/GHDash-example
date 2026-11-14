@@ -9,7 +9,7 @@
   },
   "scripts": {
     "db": "node scripts/build-db.mjs",
-    "build": "npm run db && node scripts/studio-assets.mjs && node scripts/fetch-browser-api.mjs && node scripts/copy-media.mjs && astro build && node scripts/rebase-urls.mjs dist/client && pagefind --site dist/client",
+    "build": "npm run db && node scripts/studio-assets.mjs && node scripts/fetch-browser-api.mjs && node scripts/copy-media.mjs && astro build && node scripts/rebase-urls.mjs dist/client && node scripts/redirects.mjs dist/client && pagefind --site dist/client",
     "preview": "npx serve dist/client",
     "export-content": "node scripts/db-json.mjs export data.db content",
     "test:e2e": "playwright test",
