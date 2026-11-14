@@ -1,6 +1,9 @@
 import { existsSync, readFileSync } from "node:fs";
 
-/** Reads contact.json from the site root. Returns null unless it holds an https endpoint that is not the example placeholder. */
+/**
+ * Reads contact.json from the site root. Returns null unless it holds either an https endpoint (not the example placeholder) or
+ * an issueRepo ("owner/name") whose public issues take the messages.
+ */
 export function getContact(file = "contact.json") {
 	if (!existsSync(file)) return null;
 	let config;
@@ -8,6 +11,9 @@ export function getContact(file = "contact.json") {
 		config = JSON.parse(readFileSync(file, "utf8"));
 	} catch {
 		return null;
+	}
+	if (typeof config.issueRepo === "string" && /^[\w.-]+\/[\w.-]+$/.test(config.issueRepo) && !/^your-name\//i.test(config.issueRepo)) {
+		return { kind: "issue", repo: config.issueRepo, label: typeof config.issueLabel === "string" ? config.issueLabel : "contact", subject: "", turnstileSiteKey: "", endpoint: "" };
 	}
 	let url;
 	try {
@@ -17,6 +23,7 @@ export function getContact(file = "contact.json") {
 	}
 	if (url.protocol !== "https:" || /(^|\.)example\.(com|org|net)$/i.test(url.hostname)) return null;
 	return {
+		kind: "form",
 		endpoint: url.href,
 		subject: typeof config.subject === "string" ? config.subject : "",
 		turnstileSiteKey: typeof config.turnstileSiteKey === "string" ? config.turnstileSiteKey : "",
