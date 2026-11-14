@@ -1,5 +1,6 @@
 // Real-GitHub check of the tray's commit and update flows, on a throwaway branch that is deleted afterwards.
-// node test/live.mjs   (needs network access to api.github.com with a token attached, and public/studio-data built)
+// node test/live.mjs   (needs public/studio-data built, and either GH_TOKEN set to a token with Contents read/write
+// on this repo, or a sandbox proxy that attaches one; .github/workflows/live.yml runs it with the GHDASH_LIVE_TOKEN secret)
 import init from "@sqlite.org/sqlite-wasm";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
@@ -11,18 +12,20 @@ import { snapshot } from "@digital-defiance/ghdash-pages/studio/tray.js";
 
 const content = JSON.parse(readFileSync("public/studio-data/content.json", "utf8"));
 const [owner, repo] = content.meta.repo.split("/");
+const realToken = process.env.GH_TOKEN || "";
+const auth = realToken ? { Authorization: `Bearer ${realToken}` } : {};
 const api = async (method, path, body) => {
 	const res = await fetch(`https://api.github.com/repos/${owner}/${repo}${path}`, {
-		method, headers: { Accept: "application/vnd.github+json", ...(body ? { "Content-Type": "application/json" } : {}) }, body: body && JSON.stringify(body),
+		method, headers: { Accept: "application/vnd.github+json", ...auth, ...(body ? { "Content-Type": "application/json" } : {}) }, body: body && JSON.stringify(body),
 	});
 	if (res.status === 204) return null;
 	const json = await res.json();
 	if (!res.ok) throw new Error(`${method} ${path}: ${res.status} ${json.message}`);
 	return json;
 };
-// The sandbox attaches the real token; the controller only needs a non-empty one, and must not send its own.
+// The controller only holds a placeholder token: swap in the real one, or drop it when a proxy attaches the token.
 const fetchImpl = (url, init = {}) => {
-	const headers = { ...init.headers }; delete headers.Authorization;
+	const headers = { ...init.headers, ...auth }; if (!realToken) delete headers.Authorization;
 	return fetch(url, { ...init, headers });
 };
 
