@@ -87,11 +87,12 @@ test.describe("studio (real admin, in-browser API)", () => {
 		await expect(page.getByRole("link", { name: "Posts" }).first()).toBeVisible({ timeout: 30_000 });
 	});
 
-	test("the Plugins screen lists the color plugin", async ({ page }) => {
+	test("the Plugins screen lists the installed plugins", async ({ page }) => {
 		await page.goto("studio/?p=plugins-manager");
 		await expect(page.getByText("Manage installed plugins")).toBeVisible({ timeout: 30_000 });
-		await expect(page.getByText("1 plugin")).toBeVisible();
+		await expect(page.getByText("2 plugins")).toBeVisible();
 		await expect(page.getByText("color", { exact: true })).toBeVisible();
+		await expect(page.getByText("field-kit", { exact: true })).toBeVisible();
 	});
 
 	test("a field that uses the color plugin's widget renders it, and survives a reload", async ({ page }) => {
@@ -114,6 +115,28 @@ test.describe("studio (real admin, in-browser API)", () => {
 		await page.getByText(/Work in Progress/).first().click();
 		await expect(page.getByText("Accent color")).toBeVisible();
 		await expect(page.locator("input[type=color]")).toHaveCount(1);
+		expect(problems).toEqual([]);
+	});
+
+	test("a field that uses the field-kit tags widget renders it", async ({ page }) => {
+		const problems = watch(page);
+		await open(page);
+		const status = await page.evaluate(async () => {
+			const p = (globalThis as any).__EMDASH_PATHS__;
+			const res = await p.fetch(p.apiBase + "/schema/collections/posts/fields", {
+				method: "POST",
+				headers: { "Content-Type": "application/json", "X-EmDash-Request": "1" },
+				body: JSON.stringify({ slug: "keywords", label: "Keywords", type: "json", widget: "field-kit:tags" }),
+			});
+			return res.status;
+		});
+		expect(status).toBe(201);
+		await expect(page.getByTestId("tray-count")).not.toHaveText("0");
+		await page.reload();
+		await expect(page.getByRole("link", { name: "Posts" }).first()).toBeVisible({ timeout: 30_000 });
+		await page.getByRole("link", { name: "Posts" }).first().click();
+		await page.getByText(/Work in Progress/).first().click();
+		await expect(page.getByPlaceholder("Add...")).toBeVisible();
 		expect(problems).toEqual([]);
 	});
 });
