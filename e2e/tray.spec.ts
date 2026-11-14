@@ -228,3 +228,58 @@ test("an uploaded image that is not committed yet loads from the CMS media URL i
 	});
 	expect(width).toBe(1);
 });
+
+test.describe("sign in with GitHub", () => {
+	test("the button starts the GitHub flow and the redirect back signs the editor in", async ({ page }) => {
+		const fake: Fake = { head: await headOfSite(page), commits: [] };
+		await fakeGitHub(page, fake);
+		await page.addInitScript(() => {
+			(globalThis as any).__STUDIO_OAUTH__ = { clientId: "Iv1.test", exchangeUrl: "https://signin.test/exchange" };
+		});
+		// A real site lists its Worker in connect-src when it is built with github-oauth.json; this build has none.
+		await page.route("**/studio/**", async (route) => {
+			if (route.request().resourceType() !== "document") return route.fallback();
+			const res = await route.fetch();
+			const body = (await res.text()).replace("connect-src 'self'", "connect-src 'self' https://signin.test");
+			return route.fulfill({ response: res, body });
+		});
+		let authorize: URL | undefined;
+		await page.route("https://github.com/login/oauth/authorize**", (route) => {
+			authorize = new URL(route.request().url());
+			return route.fulfill({ status: 200, contentType: "text/html", body: "<p>GitHub</p>" });
+		});
+		let exchanged: Record<string, string> | undefined;
+		await page.route("https://signin.test/exchange", (route) => {
+			const headers = { "access-control-allow-origin": "*", "access-control-allow-headers": "content-type" };
+			if (route.request().method() === "OPTIONS") return route.fulfill({ status: 204, headers });
+			exchanged = route.request().postDataJSON();
+			return route.fulfill({ status: 200, headers, contentType: "application/json", body: JSON.stringify({ access_token: "ghu_faketoken" }) });
+		});
+
+		await openStudio(page);
+		await editWorkInProgress(page, "Tray edit");
+		await page.getByTestId("tray-button").click();
+		await page.getByTestId("tray-github-signin").click();
+		await expect.poll(() => authorize?.searchParams.get("client_id")).toBe("Iv1.test");
+		expect(authorize!.searchParams.get("code_challenge_method")).toBe("S256");
+		const state = authorize!.searchParams.get("state")!;
+		const redirect = authorize!.searchParams.get("redirect_uri")!;
+		expect(redirect).toMatch(/\/studio\/$/);
+
+		await page.goto(`${redirect}?code=abc123&state=${state}`);
+		await expect(page.getByTestId("tray-button")).toBeVisible({ timeout: 30_000 });
+		await page.getByTestId("tray-button").click();
+		await expect(page.getByLabel("Commit message")).toBeVisible();
+		expect(exchanged?.code).toBe("abc123");
+		expect(exchanged?.redirect_uri).toBe(redirect);
+		expect(page.url()).not.toContain("code=");
+	});
+
+	test("without a configured sign-in there is only the token form", async ({ page }) => {
+		await openStudio(page);
+		await editWorkInProgress(page, "Tray edit");
+		await page.getByTestId("tray-button").click();
+		await expect(page.getByLabel(/GitHub token/)).toBeVisible();
+		await expect(page.getByTestId("tray-github-signin")).toHaveCount(0);
+	});
+});

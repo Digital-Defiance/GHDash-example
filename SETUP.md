@@ -65,6 +65,19 @@ To use your own Worker (free Cloudflare plan, email through a free Resend accoun
 
 The Worker accepts posts only from your site's address, limits field sizes, ignores submissions that fill the hidden trap field, and sends one email per message.
 
+## 10. Optional: "Sign in with GitHub" in the studio
+
+Without this, editors paste a fine-grained token. With it, the studio also shows a **Sign in with GitHub** button, and the token option stays. It needs a GitHub App and a small Cloudflare Worker, because GitHub's sign-in must be finished with a secret that can't live in a public site.
+
+1. On GitHub: Settings, Developer settings, GitHub Apps, **New GitHub App**. Callback URL: your studio address, for example `https://your-name.github.io/your-repo/studio/`. Untick **Webhook**. Repository permissions: **Contents: Read and write**. Create the app, copy its **Client ID**, and generate a **client secret** (keep the page open for the next step).
+2. Install the app on your site's repository (the app's **Install App** tab). A signed-in editor can then only change repositories they can write to and the app is installed on.
+3. From your site folder, deploy the Worker. Replace the two values:
+   `npx wrangler deploy node_modules/@digitaldefiance/ghdash-pages/worker/github-oauth.mjs --name ghdash-sign-in --var ALLOWED_ORIGIN:https://your-name.github.io --var GITHUB_CLIENT_ID:<client id>`
+   Then run `npx wrangler secret put GITHUB_CLIENT_SECRET --name ghdash-sign-in` and paste the client secret at the prompt. Don't put it in a file, a commit or a chat.
+4. Copy `github-oauth.example.json` to `github-oauth.json`, fill in the client ID and the Worker's address (it ends in `.workers.dev`), and commit it. Both are public.
+
+GitHub App tokens last eight hours, then the studio asks the editor to sign in again. Pending edits stay in the browser meanwhile.
+
 ## Keep it current
 
 The admin and browser API come from release assets named in `package.json`. To upgrade, change those URLs to a newer `pages-v*` release and run `npm install`.
