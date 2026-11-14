@@ -11,3 +11,4 @@ data.db-*
 .env.*
 !.env.example
 public/studio-data/
+public/studio-api/
