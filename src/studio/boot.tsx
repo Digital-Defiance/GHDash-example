@@ -1,8 +1,12 @@
 import "@emdash-cms/admin/styles.css";
 import sqlite3InitModule from "@sqlite.org/sqlite-wasm";
+import { Fragment } from "react";
 import { createRoot } from "react-dom/client";
 
+import { createController } from "./controller.js";
 import { openDb } from "./load-db.js";
+import { makeTray } from "./Tray.js";
+import { snapshot } from "./tray.js";
 
 const paths = (globalThis as any).__EMDASH_PATHS__ as { adminBase: string; apiBase: string };
 const root = document.getElementById("admin-root")!;
@@ -15,19 +19,45 @@ const [sqlite, content, empty] = await Promise.all([
 	fetch(`${site}/studio-data/content.json`).then((r) => r.json()),
 	fetch(`${site}/studio-data/empty.db`).then((r) => r.arrayBuffer()),
 ]);
-const { database } = openDb(sqlite, empty, content);
+const { db: raw, database, freshNames } = openDb(sqlite, empty, content);
 const db = new Kysely({ dialect: new SqliteDialect({ database }) });
 const realFetch = globalThis.fetch.bind(globalThis);
-const api = createBrowserApi({
+const controller = createController({ db: raw, freshNames, baseFiles: snapshot(raw, freshNames), meta: content.meta });
+const rawApi = createBrowserApi({
 	db,
 	apiBase: paths.apiBase,
 	user: { id: "github-user", email: "editor@users.noreply.github.com", name: "GitHub editor" },
 	passthrough: realFetch,
 });
-(globalThis as any).__EMDASH_PATHS__ = { ...paths, fetch: api };
+const api: typeof fetch = async (input, init) => {
+	const res = await rawApi(input, init);
+	if ((init?.method ?? (input instanceof Request ? input.method : "GET")) !== "GET") controller.schedule();
+	return res;
+};
+let queryClient: { resetQueries(): Promise<void> } | undefined;
+(globalThis as any).__EMDASH_PATHS__ = {
+	...paths,
+	fetch: api,
+	HeaderExtras: makeTray(controller as any),
+	onQueryClient: (client: typeof queryClient) => { queryClient = client; },
+};
+await controller.restore();
 
 const { AdminApp } = await import("@emdash-cms/admin");
 const { loadMessages } = await import("@emdash-cms/admin/locales");
 const messages = await loadMessages("en");
 root.textContent = "";
-createRoot(root).render(<AdminApp locale="en" messages={messages} />);
+const reactRoot = createRoot(root);
+let generation = 0;
+const render = () =>
+	reactRoot.render(
+		<Fragment key={generation}>
+			<AdminApp locale="en" messages={messages} />
+		</Fragment>,
+	);
+controller.onExternalChange(() => {
+	generation += 1;
+	render();
+	void queryClient?.resetQueries();
+});
+render();

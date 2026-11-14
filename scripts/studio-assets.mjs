@@ -16,5 +16,12 @@ for (const n of readdirSync(dir).sort()) {
 		? readdirSync(q).sort().map((f) => JSON.parse(readFileSync(join(q, f), "utf8")))
 		: JSON.parse(readFileSync(q, "utf8"));
 }
-writeFileSync(join(out, "content.json"), JSON.stringify({ ddl, tables }));
+const sh = (cmd, args) => { try { return execFileSync(cmd, args, { encoding: "utf8" }).trim(); } catch { return ""; } };
+const remote = sh("git", ["remote", "get-url", "origin"]).match(/github\.com[:/]([^/]+\/[^/.]+)/)?.[1];
+const meta = {
+	repo: process.env.GITHUB_REPOSITORY || remote || "",
+	branch: process.env.STUDIO_BRANCH || process.env.GITHUB_REF_NAME || sh("git", ["branch", "--show-current"]) || "main",
+	head: process.env.GITHUB_SHA || sh("git", ["rev-parse", "HEAD"]),
+};
+writeFileSync(join(out, "content.json"), JSON.stringify({ ddl, tables, meta }));
 execFileSync("node", ["scripts/make-empty-db.mjs", "data.db", dir, join(out, "empty.db")], { stdio: "inherit" });
