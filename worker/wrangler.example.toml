@@ -1,0 +1,10 @@
+name = "contact-form"
+main = "contact-worker.mjs"
+compatibility_date = "2025-01-01"
+
+[vars]
+ALLOWED_ORIGIN = "https://your-name.github.io"
+TO_EMAIL = "you@your-domain.com"
+FROM_EMAIL = "Contact form <forms@your-domain.com>"
+
+# Secrets, set with `npx wrangler secret put`: RESEND_API_KEY, and TURNSTILE_SECRET if you use Turnstile.
