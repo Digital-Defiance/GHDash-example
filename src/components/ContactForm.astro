@@ -1,0 +1,101 @@
+---
+interface Props {
+	endpoint: string;
+	subject?: string;
+	turnstileSiteKey?: string;
+}
+
+const { endpoint, subject = "", turnstileSiteKey = "" } = Astro.props;
+---
+
+<form class="contact" method="post" action={endpoint} data-contact>
+	{subject && <input type="hidden" name="subject" value={subject} />}
+	<p class="contact__trap" aria-hidden="true">
+		<label>Leave this empty <input type="text" name="_gotcha" tabindex="-1" autocomplete="off" /></label>
+	</p>
+	<label class="contact__field">
+		<span>Name</span>
+		<input type="text" name="name" required maxlength="200" autocomplete="name" />
+	</label>
+	<label class="contact__field">
+		<span>Email</span>
+		<input type="email" name="email" required maxlength="320" autocomplete="email" />
+	</label>
+	<label class="contact__field">
+		<span>Message</span>
+		<textarea name="message" required rows="6" maxlength="5000"></textarea>
+	</label>
+	{turnstileSiteKey && (
+		<>
+			<div class="cf-turnstile" data-sitekey={turnstileSiteKey}></div>
+			<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer is:inline></script>
+		</>
+	)}
+	<button type="submit" class="btn">Send message</button>
+	<p class="contact__status" role="status" aria-live="polite" data-contact-status></p>
+</form>
+
+<script>
+	for (const form of document.querySelectorAll<HTMLFormElement>("form[data-contact]")) {
+		const status = form.querySelector<HTMLElement>("[data-contact-status]")!;
+		form.addEventListener("submit", async (event) => {
+			event.preventDefault();
+			const button = form.querySelector<HTMLButtonElement>("button[type=submit]")!;
+			button.disabled = true;
+			status.textContent = "Sending…";
+			try {
+				const response = await fetch(form.action, {
+					method: "POST",
+					headers: { accept: "application/json" },
+					body: new FormData(form),
+				});
+				const result = await response.json().catch(() => ({}));
+				if (response.ok && result.ok !== false) {
+					form.reset();
+					status.textContent = "Thanks, your message was sent.";
+				} else {
+					status.textContent = result.error || "Sorry, that did not send. Please try again.";
+				}
+			} catch {
+				status.textContent = "Sorry, that did not send. Please check your connection and try again.";
+			}
+			button.disabled = false;
+		});
+	}
+</script>
+
+<style>
+	.contact {
+		display: grid;
+		gap: var(--spacing-4);
+		max-width: 36rem;
+	}
+	.contact__trap {
+		position: absolute;
+		inset-inline-start: -10000px;
+	}
+	.contact__field {
+		display: grid;
+		gap: var(--spacing-2);
+		font-weight: 500;
+	}
+	.contact input[type="text"],
+	.contact input[type="email"],
+	.contact textarea {
+		padding: var(--spacing-3);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-md, 8px);
+		background: var(--color-surface);
+		color: var(--color-text);
+		font: inherit;
+	}
+	.contact textarea:focus,
+	.contact input:focus {
+		outline: 2px solid transparent;
+		border-color: var(--color-muted);
+		box-shadow: 0 0 0 3px var(--color-brand-ring);
+	}
+	.contact .btn {
+		justify-self: start;
+	}
+</style>

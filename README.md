@@ -46,6 +46,10 @@ The admin and the browser API are installed from the `pages-v*` release assets o
 
 Limits: schema changes (new content types or fields) can be committed but not merged or discarded, media upload is untested, and users, passkeys and other server-only screens do nothing here. Run `npm test` for unit tests and `npm run test:e2e` for the browser suite.
 
+## Contact form
+
+A `/contact` page appears when `contact.json` holds a form endpoint (copy `contact.example.json`). `worker/contact-worker.mjs` is an optional Cloudflare Worker that emails the messages. See SETUP.md section 9.
+
 ## Comments (giscus)
 
 Posts show a [giscus](https://giscus.app) discussion thread when `giscus.json` exists. Commenters need a GitHub account. To turn it on:

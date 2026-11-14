@@ -48,6 +48,23 @@ A plugin entry in `hooks.config.json` can list `cron` jobs, for example `"cron":
 
 From the root of your site, run `npx ghdash-pages import-markdown ../your-old-site --dry-run` to see what it finds, then run it again without `--dry-run`. It writes posts, drafts and pages (with tags, dates and local images) into `content/` and `media/`. Look over `git diff`, commit, and the Action publishes them. Running it twice is safe: entries that already exist are skipped. Liquid tags that have no static equivalent are removed and listed as warnings.
 
+## 9. Optional: a contact form
+
+Static sites have no server to receive a form, so the form posts to a service. Nothing is stored in your repository.
+
+1. Pick where the form goes. Either a form service (Formspree, Web3Forms, Basin and similar: create a form there and copy its HTTPS address), or the small Worker in `worker/` (below).
+2. Copy `contact.example.json` to `contact.json`, put the address in `endpoint`, and commit it. The site then has a `/contact` page. Without `contact.json` there is no page.
+3. Link to `/contact` from your menu in the studio.
+
+To use your own Worker (free Cloudflare plan, email through a free Resend account):
+
+1. Copy `worker/wrangler.example.toml` to `worker/wrangler.toml` and fill in your site's address (`https://your-name.github.io`, no path), the address that receives mail and the sender address from a domain you verified in Resend.
+2. From `worker/`, run `npx wrangler secret put RESEND_API_KEY`, paste the key at the prompt, then `npx wrangler deploy`. Never put the key in a file or in chat.
+3. Use the Worker's address as `endpoint`.
+4. To block bots harder, create a Cloudflare Turnstile widget, add its site key to `contact.json` as `turnstileSiteKey`, and run `npx wrangler secret put TURNSTILE_SECRET`.
+
+The Worker accepts posts only from your site's address, limits field sizes, ignores submissions that fill the hidden trap field, and sends one email per message.
+
 ## Keep it current
 
 The admin and browser API come from release assets named in `package.json`. To upgrade, change those URLs to a newer `pages-v*` release and run `npm install`.
