@@ -2,18 +2,19 @@
 interface Props {
 	/** Path of the first page, e.g. "/posts" */
 	basePath: string;
-	cursor?: string;
-	nextCursor?: string;
+	page: number;
+	totalPages: number;
 }
 
-const { basePath, cursor, nextCursor } = Astro.props;
+const { basePath, page, totalPages } = Astro.props;
+const href = (n: number) => (n === 1 ? basePath : `${basePath}/page/${n}`);
 ---
 
 {
-	(cursor || nextCursor) && (
+	totalPages > 1 && (
 		<nav class="pagination" aria-label="Pagination">
-			{cursor && (
-				<a href={basePath} class="btn btn--ghost">
+			{page > 1 && (
+				<a href={href(page - 1)} class="btn btn--ghost" rel="prev">
 					<svg
 						viewBox="0 0 24 24"
 						fill="none"
@@ -26,15 +27,15 @@ const { basePath, cursor, nextCursor } = Astro.props;
 						<path d="M19 12H5" />
 						<path d="m12 19-7-7 7-7" />
 					</svg>
-					First page
+					Newer posts
 				</a>
 			)}
-			{nextCursor && (
-				<a
-					href={`${basePath}?cursor=${encodeURIComponent(nextCursor)}`}
-					class="btn btn--ghost pagination__next"
-				>
-					Next page
+			<span class="pagination__status">
+				Page {page} of {totalPages}
+			</span>
+			{page < totalPages && (
+				<a href={href(page + 1)} class="btn btn--ghost pagination__next" rel="next">
+					Older posts
 					<svg
 						viewBox="0 0 24 24"
 						fill="none"
@@ -57,8 +58,14 @@ const { basePath, cursor, nextCursor } = Astro.props;
 	.pagination {
 		display: flex;
 		flex-wrap: wrap;
+		align-items: center;
 		gap: var(--spacing-3);
 		margin-top: var(--spacing-10);
+	}
+
+	.pagination__status {
+		color: var(--color-muted);
+		font-size: var(--font-size-sm);
 	}
 
 	.pagination__next {

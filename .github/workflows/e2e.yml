@@ -24,7 +24,7 @@ jobs:
           BASE_PATH: /GHDash-example
         run: |
           for attempt in 1 2 3; do
-            npm run build && exit 0
+            PAGE_SIZE=4 npm run build && exit 0
             echo "build attempt $attempt failed, retrying"; sleep 10
           done
           exit 1

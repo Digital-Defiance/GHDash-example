@@ -27,4 +27,32 @@ test.describe("static site", () => {
 		await first.click();
 		await expect(page.locator("h1").first()).toContainText(title.split("\n")[0]!.slice(0, 20));
 	});
+
+	test("a long archive is split into pages with plain links", async ({ page }) => {
+		await page.goto("posts/");
+		const next = page.getByRole("link", { name: /Older posts/ });
+		test.skip((await next.count()) === 0, "built with a page size that fits every post on one page");
+		await expect(page.getByText(/^Page 1 of \d+$/)).toBeVisible();
+		await next.click();
+		await expect(page).toHaveURL(/\/posts\/page\/2\/?$/);
+		await expect(page.getByText(/^Page 2 of \d+$/)).toBeVisible();
+		await page.getByRole("link", { name: /Newer posts/ }).click();
+		await expect(page).toHaveURL(/\/posts\/?$/);
+	});
+
+	test("search finds a post and links to it under the base path", async ({ page }) => {
+		await page.goto("search/");
+		await page.locator("#search-query").fill("weekend");
+		await page.locator("#search-form").getByRole("button", { name: "Search" }).click();
+		const link = page.locator("#search-list a").first();
+		await expect(link).toContainText(/weekend/i);
+		expect(await link.getAttribute("href")).toMatch(/^\/GHDash-example\/posts\/.+/);
+		await link.click();
+		await expect(page.locator("h1").first()).toContainText(/weekend/i);
+	});
+
+	test("search says so when nothing matches", async ({ page }) => {
+		await page.goto("search/?q=zzzzqqqq");
+		await expect(page.getByText(/No results for/)).toBeVisible();
+	});
 });

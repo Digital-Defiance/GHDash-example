@@ -1,61 +1,8 @@
 ---
-export const prerender = false;
-
-import { search, SearchUnavailableError, type SearchResponse } from "emdash";
 import Base from "../layouts/Base.astro";
-
-const query = Astro.url.searchParams.get("q")?.trim() || "";
-
-// Use the FTS-backed search() API instead of loading every post and
-// filtering in JS. FTS scales as the post count grows, returns ranked
-// results, and handles tokenization/stemming. Templates that grep all
-// post bodies in JS quickly become unusable past a few hundred posts.
-let searchResponse: SearchResponse = { items: [] };
-let searchUnavailable = false;
-if (query) {
-	try {
-		searchResponse = await search(query, { collections: ["posts"], limit: 30 });
-	} catch (error) {
-		if (!(error instanceof SearchUnavailableError)) throw error;
-		searchUnavailable = true;
-	}
-}
-const { items: results, nextCursor } = searchResponse;
-
-function escapeHtml(text: string) {
-	return text
-		.replaceAll("&", "&amp;")
-		.replaceAll("<", "&lt;")
-		.replaceAll(">", "&gt;")
-		.replaceAll('"', "&quot;")
-		.replaceAll("'", "&#39;");
-}
-
-// The snippet is cut from the first indexed field, which for posts is the
-// title. When it is the whole title, show its highlights in the heading
-// instead of repeating the title underneath.
-const rows = results.map((result) => {
-	const title = result.title ?? "Untitled";
-	const snippetIsTitle =
-		result.snippet?.replaceAll("<mark>", "").replaceAll("</mark>", "") ===
-		escapeHtml(title);
-	return {
-		path: `/posts/${result.slug ?? result.id}`,
-		title,
-		titleHtml: snippetIsTitle ? result.snippet : undefined,
-		snippet: snippetIsTitle ? undefined : result.snippet,
-	};
-});
-
-const countLabel = nextCursor
-	? `Top ${rows.length} results`
-	: `${rows.length} ${rows.length === 1 ? "result" : "results"}`;
 ---
 
-<Base
-	title={query ? `Search: ${query}` : "Search"}
-	description="Search blog posts"
->
+<Base title="Search" description="Search blog posts">
 	<header class="band intro">
 		<div class="frame">
 			<p class="eyebrow">Search</p>
@@ -66,6 +13,7 @@ const countLabel = nextCursor
 				role="search"
 				aria-label="Posts"
 				class="search-form"
+				id="search-form"
 			>
 				<label for="search-query" class="sr-only">Search posts</label>
 				<div class="search-field">
@@ -86,111 +34,119 @@ const countLabel = nextCursor
 						class="search-field__input"
 						type="search"
 						name="q"
-						value={query}
 						placeholder="Search posts"
-						autofocus={!query}
+						autofocus
 					/>
 					<button type="submit" class="btn search-field__submit">Search</button>
 				</div>
 			</form>
-			{
-				!query && (
-					<p class="search-hint">
-						Searches post titles and full text. Not sure where to start?{" "}
-						<a href="/posts">Browse all posts</a>.
-					</p>
-				)
-			}
+			<p class="search-hint" id="search-hint">
+				Searches post titles and full text. Not sure where to start?{" "}
+				<a href="/posts">Browse all posts</a>.
+			</p>
 		</div>
 	</header>
 
-	{
-		query && (
-			<section class="band section">
-				<div class="frame">
-					{searchUnavailable ? (
-						<div class="empty-state">
-							<h2 class="empty-state__title">Search isn't available right now</h2>
-							<p class="empty-state__text">Please try again later.</p>
-						</div>
-					) : rows.length > 0 ? (
-						<>
-							<div class="section-head">
-								<p class="search-summary">
-									<strong>{countLabel}</strong> for “{query}”
-								</p>
-								<a href="/posts" class="arrow-link">
-									All posts
-									<svg
-										viewBox="0 0 24 24"
-										fill="none"
-										stroke="currentColor"
-										stroke-width="1.75"
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										aria-hidden="true"
-									>
-										<path d="M5 12h14" />
-										<path d="m12 5 7 7-7 7" />
-									</svg>
-								</a>
-							</div>
-							<ol class="results" role="list">
-								{rows.map((row) => (
-									<li class="result">
-										<div class="result__body">
-											<h2 class="result__title">
-												<a href={row.path} class="result__link">
-													{row.titleHtml ? (
-														<Fragment set:html={row.titleHtml} />
-													) : (
-														row.title
-													)}
-												</a>
-											</h2>
-											{row.snippet && (
-												<p class="result__snippet" set:html={row.snippet} />
-											)}
-											<p class="result__path">
-												<span dir="ltr">{row.path}</span>
-											</p>
-										</div>
-										<svg
-											class="result__arrow"
-											viewBox="0 0 24 24"
-											fill="none"
-											stroke="currentColor"
-											stroke-width="1.75"
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											aria-hidden="true"
-										>
-											<path d="M5 12h14" />
-											<path d="m12 5 7 7-7 7" />
-										</svg>
-									</li>
-								))}
-							</ol>
-						</>
-					) : (
-						<div class="empty-state">
-							<h2 class="empty-state__title">No results for “{query}”</h2>
-							<p class="empty-state__text">
-								Check the spelling, try fewer or different words, or browse
-								every post instead.
-							</p>
-							<div class="empty-state__actions">
-								<a href="/posts" class="btn btn--ghost">
-									Browse all posts
-								</a>
-							</div>
-						</div>
-					)}
+	<section class="band section" id="search-results" hidden>
+		<div class="frame">
+			<div class="section-head">
+				<p class="search-summary" id="search-summary" role="status"></p>
+				<a href="/posts" class="arrow-link">All posts</a>
+			</div>
+			<ol class="results" role="list" id="search-list"></ol>
+			<div class="empty-state" id="search-empty" hidden>
+				<h2 class="empty-state__title" id="search-empty-title"></h2>
+				<p class="empty-state__text">
+					Check the spelling, try fewer or different words, or browse every
+					post instead.
+				</p>
+				<div class="empty-state__actions">
+					<a href="/posts" class="btn btn--ghost">Browse all posts</a>
 				</div>
-			</section>
-		)
-	}
+			</div>
+		</div>
+	</section>
+
+	<template id="search-result">
+		<li class="result">
+			<div class="result__body">
+				<h2 class="result__title"><a class="result__link"></a></h2>
+				<p class="result__snippet"></p>
+				<p class="result__path"><span dir="ltr"></span></p>
+			</div>
+			<svg
+				class="result__arrow"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="1.75"
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				aria-hidden="true"
+			>
+				<path d="M5 12h14" />
+				<path d="m12 5 7 7-7 7" />
+			</svg>
+		</li>
+	</template>
 </Base>
+
+<script>
+	// The site is static, so search runs in the browser over the index that Pagefind builds after the site.
+	const base = location.pathname.replace(/search\/?$/, "");
+	const $ = (id: string) => document.getElementById(id)!;
+	const input = $("search-query") as HTMLInputElement;
+	const results = $("search-results");
+	let pagefind: any;
+
+	async function run(query: string) {
+		$("search-hint").hidden = Boolean(query);
+		results.hidden = !query;
+		if (!query) return;
+		try {
+			pagefind ??= await import(/* @vite-ignore */ `${base}pagefind/pagefind.js`);
+		} catch {
+			$("search-summary").textContent = "Search isn't available right now.";
+			return;
+		}
+		const found = await pagefind.search(query);
+		const hits = await Promise.all(found.results.slice(0, 30).map((r: any) => r.data()));
+		const list = $("search-list");
+		list.replaceChildren();
+		const template = $("search-result") as HTMLTemplateElement;
+		for (const hit of hits) {
+			const li = (template.content.cloneNode(true) as DocumentFragment).firstElementChild as HTMLElement;
+			const a = li.querySelector("a")!;
+			const root = base.replace(/\/$/, "");
+			const href = root && !hit.url.startsWith(`${root}/`) ? root + hit.url : hit.url;
+			a.href = href;
+			a.textContent = hit.meta.title || href;
+			li.querySelector(".result__snippet")!.innerHTML = hit.excerpt;
+			li.querySelector(".result__path span")!.textContent = href;
+			list.append(li);
+		}
+		const none = hits.length === 0;
+		$("search-empty").hidden = !none;
+		list.hidden = none;
+		$("search-empty-title").textContent = `No results for “${query}”`;
+		$("search-summary").replaceChildren();
+		if (!none) {
+			const strong = document.createElement("strong");
+			strong.textContent = `${found.results.length > 30 ? "Top 30 results" : `${hits.length} ${hits.length === 1 ? "result" : "results"}`}`;
+			$("search-summary").append(strong, ` for “${query}”`);
+		}
+	}
+
+	$("search-form").addEventListener("submit", (e) => {
+		e.preventDefault();
+		const q = input.value.trim();
+		history.replaceState(null, "", q ? `?q=${encodeURIComponent(q)}` : location.pathname);
+		void run(q);
+	});
+	const initial = new URLSearchParams(location.search).get("q")?.trim() ?? "";
+	input.value = initial;
+	void run(initial);
+</script>
 
 <style>
 	.search-form {

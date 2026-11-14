@@ -1,8 +1,18 @@
 ---
 export async function getStaticPaths() {
-	const { getTaxonomyTerms } = await import("emdash");
+	const { getTaxonomyTerms, getEmDashCollection } = await import("emdash");
+	const { PAGE_SIZE, pageCursors, pageParam } = await import("../../../utils/paginate");
 	const terms = await getTaxonomyTerms("category");
-	return terms.map((t) => ({ params: { slug: t.slug } }));
+	const paths = [];
+	for (const t of terms) {
+		const cursors = await pageCursors((cursor) =>
+			getEmDashCollection("posts", { where: { category: t.slug }, orderBy: { published_at: "desc" }, limit: PAGE_SIZE, cursor }),
+		);
+		cursors.forEach((cursor, i) =>
+			paths.push({ params: { slug: t.slug, page: pageParam(i + 1) }, props: { cursor, page: i + 1, totalPages: cursors.length } }),
+		);
+	}
+	return paths;
 }
 
 import {
@@ -11,9 +21,10 @@ import {
 	getTermsForEntries,
 	decodeSlug,
 } from "emdash";
-import Base from "../../layouts/Base.astro";
-import PostCard from "../../components/PostCard.astro";
-import Pagination from "../../components/Pagination.astro";
+import Base from "../../../layouts/Base.astro";
+import PostCard from "../../../components/PostCard.astro";
+import { PAGE_SIZE } from "../../../utils/paginate";
+import Pagination from "../../../components/Pagination.astro";
 
 const slug = decodeSlug(Astro.params.slug);
 const termsResult = await getTaxonomyTermsWithCacheHint("category", {
@@ -25,15 +36,14 @@ if (!term) {
 	return Astro.rewrite("/404");
 }
 
-const cursor = Astro.url.searchParams.get("cursor") || undefined;
+const { cursor, page, totalPages } = Astro.props;
 const {
 	entries: posts,
 	cacheHint,
-	nextCursor,
 } = await getEmDashCollection("posts", {
 	where: { category: term.slug },
 	orderBy: { published_at: "desc" },
-	limit: 20,
+	limit: PAGE_SIZE,
 	cursor,
 });
 
@@ -99,26 +109,24 @@ const filteredPosts = posts.map((post) => ({
 						</div>
 						<Pagination
 							basePath={`/category/${term.slug}`}
-							cursor={cursor}
-							nextCursor={nextCursor}
+							page={page}
+							totalPages={totalPages}
 						/>
 					</>
 				) : (
 					<div class="empty-state">
 						<h2 class="empty-state__title">
-							{cursor ? "No more posts" : "Nothing here yet"}
+							Nothing here yet
 						</h2>
 						<p class="empty-state__text">
-							{cursor
-								? "This page is past the last post."
-								: `No posts have been filed under ${term.label} so far.`}
+							{`No posts have been filed under ${term.label} so far.`}
 						</p>
 						<div class="empty-state__actions">
 							<a
-								href={cursor ? `/category/${term.slug}` : "/posts"}
+								href="/posts"
 								class="btn btn--ghost"
 							>
-								{cursor ? "Back to the first page" : "Browse all posts"}
+								Browse all posts
 							</a>
 						</div>
 					</div>

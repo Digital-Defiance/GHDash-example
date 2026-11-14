@@ -45,7 +45,7 @@ const seo = getSeoMeta(page, {
 	robots={seo.robots}
 	content={{ collection: "pages", id: page.data.id, slug }}
 >
-	<article class="band page">
+	<article class="band page" data-pagefind-body>
 		<div class="frame page__layout">
 			<header class="page__header">
 				<h1 class="page__title" {...page.edit.title}>{page.data.title}</h1>

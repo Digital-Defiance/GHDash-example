@@ -128,7 +128,7 @@ const hasHeadings = (post.data.content ?? []).some(
 	modifiedTime={post.data.updatedAt.toISOString()}
 	content={{ collection: "posts", id: post.data.id, slug }}
 >
-	<article class="post">
+	<article class="post" data-pagefind-body>
 		<header class="intro post-header">
 			<div class="frame">
 				<div class="post-header__inner">
