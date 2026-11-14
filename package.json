@@ -20,6 +20,7 @@
     "@astrojs/react": "7.0.0",
     "@emdash-cms/admin": "https://github.com/Digital-Defiance/ghdash/releases/download/pages-v0.6.0/emdash-cms-admin-1.5.0.tgz",
     "@emdash-cms/plugin-color": "^0.2.1",
+    "@emdash-cms/plugin-embeds": "^0.1.59",
     "@emdash-cms/plugin-field-kit": "^0.1.3",
     "@sqlite.org/sqlite-wasm": "3.50.4-build1",
     "astro": "7.3.2",

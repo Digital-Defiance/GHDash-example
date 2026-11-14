@@ -90,9 +90,10 @@ test.describe("studio (real admin, in-browser API)", () => {
 	test("the Plugins screen lists the installed plugins", async ({ page }) => {
 		await page.goto("studio/?p=plugins-manager");
 		await expect(page.getByText("Manage installed plugins")).toBeVisible({ timeout: 30_000 });
-		await expect(page.getByText("2 plugins")).toBeVisible();
+		await expect(page.getByText("3 plugins")).toBeVisible();
 		await expect(page.getByText("color", { exact: true })).toBeVisible();
 		await expect(page.getByText("field-kit", { exact: true })).toBeVisible();
+		await expect(page.getByText("embeds", { exact: true })).toBeVisible();
 	});
 
 	test("a field that uses the color plugin's widget renders it, and survives a reload", async ({ page }) => {
@@ -137,6 +138,30 @@ test.describe("studio (real admin, in-browser API)", () => {
 		await page.getByRole("link", { name: "Posts" }).first().click();
 		await page.getByText(/Work in Progress/).first().click();
 		await expect(page.getByPlaceholder("Add...")).toBeVisible();
+		expect(problems).toEqual([]);
+	});
+
+	test("the editor offers the embeds plugin's blocks, and an inserted YouTube block is saved", async ({ page }) => {
+		const problems = watch(page);
+		await open(page);
+		await page.getByRole("link", { name: "Posts" }).first().click();
+		await page.getByText(/Work in Progress/).first().click();
+		const editor = page.locator(".ProseMirror").first();
+		await editor.click();
+		await page.keyboard.press("End");
+		await page.keyboard.type("/");
+		await page.getByText("YouTube Video", { exact: true }).first().click();
+		const url = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+		await page.getByPlaceholder("https://youtube.com/watch?v=...").fill(url);
+		await page.getByRole("button", { name: "Insert" }).click();
+		await page.getByRole("button", { name: /^Save/ }).first().click();
+		await expect(page.getByText("Saved")).toBeVisible();
+		const saved = await page.evaluate(async () => {
+			const p = (globalThis as any).__EMDASH_PATHS__;
+			return (await p.fetch(p.apiBase + "/content/posts?limit=50")).text();
+		});
+		expect(saved).toContain("dQw4w9WgXcQ");
+		expect(saved).toContain("youtube");
 		expect(problems).toEqual([]);
 	});
 });
