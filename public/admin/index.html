@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Site editor</title>
+<style>
+	:root { color-scheme: light dark; --bg: #fff; --fg: #1a1a1a; --muted: #666; --line: #d8d8d8; --accent: #1f5fd1; --bad: #b3261e; --ok: #1b7a3a; }
+	@media (prefers-color-scheme: dark) { :root { --bg: #16181c; --fg: #ececec; --muted: #9aa0a6; --line: #34383f; --accent: #7aa7ff; --bad: #ff8a80; --ok: #6fd18f; } }
+	* { box-sizing: border-box; }
+	body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.5 system-ui, sans-serif; }
+	main { max-width: 760px; margin: 0 auto; padding: 24px 16px 64px; }
+	h1 { font-size: 1.4rem; margin: 0 0 4px; }
+	p.sub { color: var(--muted); margin: 0 0 24px; }
+	label { display: block; font-weight: 600; margin: 16px 0 4px; }
+	input, textarea, select, button { font: inherit; color: inherit; background: transparent; border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; }
+	input, textarea, select { width: 100%; }
+	textarea { min-height: 260px; resize: vertical; }
+	button { cursor: pointer; }
+	button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+	button:disabled { opacity: .5; cursor: default; }
+	.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 16px; }
+	.list { list-style: none; padding: 0; margin: 0; border: 1px solid var(--line); border-radius: 8px; }
+	.list li { display: flex; justify-content: space-between; gap: 12px; padding: 10px 12px; border-top: 1px solid var(--line); cursor: pointer; }
+	.list li:first-child { border-top: 0; }
+	.list li:hover { background: color-mix(in srgb, var(--accent) 10%, transparent); }
+	.tag { color: var(--muted); font-size: .85rem; }
+	#msg { margin-top: 16px; min-height: 1.5em; }
+	.ok { color: var(--ok); } .bad { color: var(--bad); }
+	.note { color: var(--muted); font-size: .9rem; }
+	[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<main>
+	<h1>Site editor</h1>
+	<p class="sub">Edits are saved as commits to this site's GitHub repo. Your token stays in this browser tab and is only sent to api.github.com.</p>
+
+	<section id="signin">
+		<label for="repo">Repository</label>
+		<input id="repo" placeholder="owner/repo" autocomplete="off">
+		<label for="branch">Branch</label>
+		<input id="branch" value="main" autocomplete="off">
+		<label for="token">Fine-grained personal access token <span class="note">(Contents: read and write on this repo only)</span></label>
+		<input id="token" type="password" autocomplete="off" placeholder="github_pat_...">
+		<div class="row"><button class="primary" id="signin-btn">Sign in</button></div>
+	</section>
+
+	<section id="list" hidden>
+		<div class="row" style="margin-top:0">
+			<strong id="who"></strong>
+			<span style="flex:1"></span>
+			<button id="new-post">New post</button>
+			<button id="signout">Sign out</button>
+		</div>
+		<h2>Posts</h2><ul class="list" id="posts"></ul>
+		<h2>Pages</h2><ul class="list" id="pages"></ul>
+	</section>
+
+	<section id="edit" hidden>
+		<div class="row" style="margin-top:0"><button id="back">&larr; Back</button><span class="tag" id="slug-label"></span></div>
+		<label for="title">Title</label>
+		<input id="title">
+		<label for="excerpt" id="excerpt-label">Excerpt</label>
+		<textarea id="excerpt" style="min-height:70px"></textarea>
+		<label for="body">Body <span class="note">(blank line between paragraphs)</span></label>
+		<textarea id="body"></textarea>
+		<p class="note" id="body-locked" hidden>This entry uses formatting this editor can't round-trip yet (headings, links, images, lists). The body is read-only here, so saving keeps it exactly as is. Edit title and excerpt, or use the full admin later.</p>
+		<label for="status">Status</label>
+		<select id="status"><option value="published">Published</option><option value="draft">Draft</option></select>
+		<div class="row"><button class="primary" id="save">Save (commit)</button></div>
+	</section>
+
+	<div id="msg" role="status"></div>
+</main>
+
+<script type="module">
+const $ = (id) => document.getElementById(id);
+const COLLECTIONS = { posts: "content/ec_posts", pages: "content/ec_pages" };
+const store = (() => { try { return window.sessionStorage; } catch { return { getItem: () => null, setItem() {}, removeItem() {} }; } })();
+
+let S = { token: "", owner: "", repo: "", branch: "main", head: "", rows: { posts: [], pages: [] }, current: null };
+
+function say(text, cls = "") { const m = $("msg"); m.textContent = text; m.className = cls; }
+function show(name) { for (const s of ["signin", "list", "edit"]) $(s).hidden = s !== name; }
+
+async function gh(method, path, body, accept) {
+	const res = await fetch(`https://api.github.com${path}`, {
+		method,
+		headers: {
+			Accept: accept || "application/vnd.github+json",
+			Authorization: `Bearer ${S.token}`,
+			"X-GitHub-Api-Version": "2022-11-28",
+			...(body ? { "Content-Type": "application/json" } : {}),
+		},
+		body: body ? JSON.stringify(body) : undefined,
+	});
+	if (!res.ok) {
+		const j = await res.json().catch(() => ({}));
+		const e = new Error(`GitHub ${res.status}: ${j.message || res.statusText}`); e.status = res.status; throw e;
+	}
+	return accept ? res.text() : res.status === 204 ? null : res.json();
+}
+const repoPath = () => `/repos/${S.owner}/${S.repo}`;
+
+const sortKeys = (o) => Object.fromEntries(Object.keys(o).sort().map((k) => [k, o[k]]));
+const serialize = (row) => JSON.stringify(sortKeys(row), null, "\t") + "\n";
+
+// ---- the body <-> Portable Text round trip, restricted to what is lossless ----
+function blocksToText(contentJson) {
+	let blocks;
+	try { blocks = typeof contentJson === "string" ? JSON.parse(contentJson) : contentJson; } catch { return null; }
+	if (blocks == null) return "";
+	if (!Array.isArray(blocks)) return null;
+	const paras = [];
+	for (const b of blocks) {
+		const plain = b && b._type === "block" && b.style === "normal" && !b.listItem && (!b.markDefs || !b.markDefs.length)
+			&& Array.isArray(b.children) && b.children.length === 1 && b.children[0]._type === "span" && (!b.children[0].marks || !b.children[0].marks.length);
+		if (!plain) return null;
+		paras.push(b.children[0].text);
+	}
+	return paras.join("\n\n");
+}
+const rid = () => crypto.randomUUID().replace(/-/g, "").slice(0, 12);
+function textToBlocks(text) {
+	return text.split(/\n\s*\n/).map((t) => t.trim()).filter(Boolean).map((t) => ({
+		_type: "block", _key: rid(), style: "normal", markDefs: [],
+		children: [{ _type: "span", _key: rid(), text: t, marks: [] }],
+	}));
+}
+
+// ---- loading ----
+async function loadAll() {
+	say("Loading content…");
+	S.head = (await gh("GET", `${repoPath()}/git/ref/heads/${S.branch}`)).object.sha;
+	for (const [name, dir] of Object.entries(COLLECTIONS)) {
+		let files = [];
+		try { files = await gh("GET", `${repoPath()}/contents/${dir}?ref=${S.head}`); } catch (e) { if (e.status !== 404) throw e; }
+		S.rows[name] = await Promise.all(files.filter((f) => f.name.endsWith(".json")).map(async (f) => {
+			const text = await gh("GET", `${repoPath()}/contents/${f.path}?ref=${S.head}`, null, "application/vnd.github.raw+json");
+			return { path: f.path, row: JSON.parse(text) };
+		}));
+		S.rows[name].sort((a, b) => String(b.row.published_at || b.row.created_at).localeCompare(String(a.row.published_at || a.row.created_at)));
+	}
+	renderLists();
+	say("");
+}
+function renderLists() {
+	for (const name of Object.keys(COLLECTIONS)) {
+		const ul = $(name); ul.textContent = "";
+		if (!S.rows[name].length) { const li = document.createElement("li"); li.textContent = "Nothing yet"; ul.append(li); }
+		for (const item of S.rows[name]) {
+			const li = document.createElement("li");
+			const t = document.createElement("span"); t.textContent = item.row.title || item.row.slug;
+			const s = document.createElement("span"); s.className = "tag"; s.textContent = item.row.status;
+			li.append(t, s); li.onclick = () => openEditor(name, item); ul.append(li);
+		}
+	}
+}
+
+// ---- editing ----
+function openEditor(collection, item) {
+	S.current = { collection, item, isNew: false };
+	const r = item.row, text = blocksToText(r.content);
+	$("slug-label").textContent = `${collection}/${r.slug}`;
+	$("title").value = r.title || "";
+	$("excerpt").value = r.excerpt || "";
+	$("excerpt-label").hidden = $("excerpt").hidden = collection !== "posts";
+	$("body").value = text ?? ""; $("body").disabled = text === null; $("body-locked").hidden = text !== null;
+	$("status").value = r.status === "draft" ? "draft" : "published";
+	show("edit"); say("");
+}
+function slugify(s) { return s.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 80) || "untitled"; }
+const B32 = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
+function ulid() {
+	let t = Date.now(), ts = ""; for (let i = 0; i < 10; i++) { ts = B32[t % 32] + ts; t = Math.floor(t / 32); }
+	const r = crypto.getRandomValues(new Uint8Array(16)); return ts + [...r].map((b) => B32[b % 32]).join("");
+}
+function newPost() {
+	const id = ulid(), now = new Date().toISOString();
+	const row = { author_id: null, content: "[]", created_at: now, deleted_at: null, draft_revision_id: null, excerpt: "", featured_image: null, id, live_revision_id: null, locale: "en", primary_byline_id: null, published_at: null, scheduled_at: null, slug: "", status: "draft", title: "", translation_group: id, updated_at: now, version: 1 };
+	S.current = { collection: "posts", item: { path: `${COLLECTIONS.posts}/${id}.json`, row }, isNew: true };
+	$("slug-label").textContent = "new post"; $("title").value = ""; $("excerpt").value = ""; $("body").value = "";
+	$("excerpt-label").hidden = $("excerpt").hidden = false; $("body").disabled = false; $("body-locked").hidden = true; $("status").value = "draft";
+	show("edit"); say("");
+}
+
+async function save() {
+	const { collection, item, isNew } = S.current, row = { ...item.row };
+	const title = $("title").value.trim();
+	if (!title) return say("A title is required.", "bad");
+	row.title = title;
+	if (collection === "posts") row.excerpt = $("excerpt").value.trim();
+	if (!$("body").disabled) row.content = JSON.stringify(textToBlocks($("body").value));
+	if (isNew) {
+		const taken = new Set(S.rows[collection].map((x) => x.row.slug));
+		let slug = slugify(title), n = 2; while (taken.has(slug)) slug = `${slugify(title)}-${n++}`;
+		row.slug = slug;
+	}
+	const status = $("status").value, now = new Date().toISOString();
+	row.status = status;
+	if (status === "published" && !row.published_at) row.published_at = now;
+	row.updated_at = now; row.version = (row.version || 0) + 1;
+
+	$("save").disabled = true; say("Saving…");
+	try {
+		const head = (await gh("GET", `${repoPath()}/git/ref/heads/${S.branch}`)).object.sha;
+		if (head !== S.head) { say("The site changed on GitHub since you loaded it. Reload to pick up the latest, then redo your edit.", "bad"); return; }
+		const base = await gh("GET", `${repoPath()}/git/commits/${head}`);
+		const tree = await gh("POST", `${repoPath()}/git/trees`, { base_tree: base.tree.sha, tree: [{ path: item.path, mode: "100644", type: "blob", content: serialize(row) }] });
+		const commit = await gh("POST", `${repoPath()}/git/commits`, { message: `${isNew ? "Add" : "Edit"} ${collection === "posts" ? "post" : "page"}: ${title}`, tree: tree.sha, parents: [head] });
+		try { await gh("PATCH", `${repoPath()}/git/refs/heads/${S.branch}`, { sha: commit.sha, force: false }); }
+		catch (e) { if (e.status === 422) { say("Someone else pushed at the same moment. Reload and try again.", "bad"); return; } throw e; }
+		S.head = commit.sha; item.row = row;
+		if (isNew) S.rows[collection].unshift(item);
+		renderLists(); show("list");
+		say("Saved. The site rebuilds in about a minute.", "ok");
+	} catch (e) { say(e.message, "bad"); }
+	finally { $("save").disabled = false; }
+}
+
+// ---- sign in ----
+async function signIn() {
+	const [owner, repo] = $("repo").value.trim().split("/");
+	S = { ...S, token: $("token").value.trim(), owner, repo, branch: $("branch").value.trim() || "main" };
+	if (!owner || !repo || !S.token) return say("Enter owner/repo and a token.", "bad");
+	$("signin-btn").disabled = true; say("Checking access…");
+	try {
+		const r = await gh("GET", repoPath());
+		if (!r.permissions?.push) throw new Error("This token can read the repo but not push to it. It needs Contents: read and write.");
+		store.setItem("ghpages-editor", JSON.stringify({ token: S.token, owner, repo, branch: S.branch }));
+		$("who").textContent = `${owner}/${repo}@${S.branch}`;
+		show("list"); await loadAll();
+	} catch (e) { show("signin"); say(e.message, "bad"); }
+	finally { $("signin-btn").disabled = false; }
+}
+function signOut() { store.removeItem("ghpages-editor"); S.token = ""; $("token").value = ""; show("signin"); say(""); }
+
+$("signin-btn").onclick = signIn; $("signout").onclick = signOut; $("save").onclick = save;
+$("back").onclick = () => { show("list"); say(""); }; $("new-post").onclick = newPost;
+
+// Guess owner/repo from the Pages URL (owner.github.io/repo/admin/).
+const m = location.hostname.match(/^([^.]+)\.github\.io$/), seg = location.pathname.split("/").filter(Boolean)[0];
+if (m && seg && seg !== "admin") $("repo").value = `${m[1]}/${seg}`;
+try { const saved = JSON.parse(store.getItem("ghpages-editor") || "null");
+	if (saved) { $("repo").value = `${saved.owner}/${saved.repo}`; $("branch").value = saved.branch; $("token").value = saved.token; signIn(); }
+} catch {}
+</script>
+</body>
+</html>

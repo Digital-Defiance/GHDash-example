@@ -15,6 +15,15 @@ content/*.json  ──►  scripts/build-db.mjs  ──►  data.db (SQLite)  �
 - `data.db` is rebuilt from `content/` on every build and is not committed.
 - `.github/workflows/pages.yml` builds and deploys. It sets `BASE_PATH` so links work under `/<repo>/`.
 
+## Edit from the browser
+
+Open `https://<owner>.github.io/<repo>/admin/`, paste a fine-grained personal access token (Contents: read and write, this repo only), and edit. Each save is one commit; the Action then rebuilds the site.
+
+- Create and edit posts and pages: title, excerpt, plain-paragraph body, draft or published.
+- Posts that use headings, links, images or lists have a read-only body here, so saving never damages them.
+- The token is kept in the browser tab's session storage and is only sent to `api.github.com`.
+- If someone else pushed in the meantime, the editor refuses to save and asks you to reload.
+
 ## Run it locally
 
 ```bash
@@ -32,6 +41,6 @@ Settings → Pages → Build and deployment → Source: **GitHub Actions**.
 - The search page is not available yet. It needs Pagefind.
 - Lists show the first page only, because `?cursor=` pagination needs a server.
 - Comments are not wired up yet. They will use giscus.
-- Content is edited by hand for now. The browser admin comes in Phase 2.
+- Editing: `/admin/` is a minimal editor (see below). The full EmDash admin comes later in Phase 2.
 
 Regenerate `content/` from a local EmDash database with `npm run export-content` after editing in `emdash dev` or the CLI.
