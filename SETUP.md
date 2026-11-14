@@ -25,7 +25,7 @@ Edits collect in the pending-changes tray. **Commit** writes them as one commit,
 
 ## 4. Optional: comments
 
-Follow the "Comments (giscus)" steps in the README. Commenters need a GitHub account.
+Follow the "Comments (giscus)" steps in the README. Commenters need a GitHub account. Comments live in your repository's GitHub Discussions, so moderate them there (delete, lock or hide a comment on GitHub). The studio's Comments screen only lists comments stored by the CMS itself, so it stays empty on this setup.
 
 ## 5. Optional: scheduled posts
 
