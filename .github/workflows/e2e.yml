@@ -21,7 +21,7 @@ jobs:
         env:
           NODE_OPTIONS: --max-old-space-size=4096
           SITE_URL: http://localhost:4400
-          BASE_PATH: /GHDash-example
+          BASE_PATH: /site
         run: |
           for attempt in 1 2 3; do
             PAGE_SIZE=4 npm run build && exit 0

@@ -4,6 +4,8 @@ An [EmDash](https://github.com/Digital-Defiance/ghdash) blog that runs entirely 
 
 Design and progress: [SPEC.md and TODO.md in the main repo](https://github.com/Digital-Defiance/ghdash/tree/spike/ghpages-phase0/ghpages-port).
 
+Want your own? See [SETUP.md](SETUP.md): use this repository as a template, turn on Pages, and paste a token.
+
 ## How it works
 
 ```

@@ -1,0 +1,40 @@
+# Set up your own site from this template
+
+This repository is a complete EmDash site that builds and runs on GitHub Pages. Nothing in it is tied to one repository name, so you can start your own copy in a few minutes.
+
+## 1. Create your repository
+
+Use **Use this template → Create a new repository** on GitHub. Make the repository public: the content lives in it as JSON and Pages on a free plan needs a public repository. (If you forked instead of using the template, everything below still applies.)
+
+## 2. Turn on Pages
+
+Settings → Pages → Build and deployment → Source: **GitHub Actions**. Then run Actions → *Build and deploy* once, or push any commit. The site appears at `https://<owner>.github.io/<repo>/`.
+
+The workflow sets the base path and site URL from your repository name, so no file needs editing.
+
+## 3. Edit from the browser
+
+Open `https://<owner>.github.io/<repo>/studio/`. The first time it asks for a token:
+
+1. GitHub → Settings → Developer settings → Fine-grained tokens → **Generate new token**.
+2. Repository access: **Only select repositories**, pick your site's repository.
+3. Permissions: **Contents: Read and write**. Nothing else is needed.
+4. Paste it into the studio. It stays in that browser tab and is only sent to `api.github.com`.
+
+Edits collect in the pending-changes tray. **Commit** writes them as one commit, and the Action rebuilds the site in a minute or two.
+
+## 4. Optional: comments
+
+Follow the "Comments (giscus)" steps in the README. Commenters need a GitHub account.
+
+## 5. Optional: scheduled posts
+
+Schedule a post in the studio and the hourly workflow publishes it once its time passes. The workflow asks for `contents: write` itself and commits the published state back to `main`; if your organisation blocks that, set Settings → Actions → General → Workflow permissions to **Read and write**.
+
+## Keep it current
+
+The admin and browser API come from release assets named in `package.json`. To upgrade, change those URLs to a newer `pages-v*` release and run `npm install`.
+
+## Run the tests
+
+`npm test` runs the unit tests. For the browser suite, build with `BASE_PATH=/site` and run `BASE_PATH=/site npm run test:e2e`. The suite uses `/site` when `BASE_PATH` is unset.

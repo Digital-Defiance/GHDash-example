@@ -2,6 +2,8 @@ import { existsSync } from "node:fs";
 
 import { expect, test, type Page } from "@playwright/test";
 
+import { BASE } from "./base";
+
 function watch(page: Page) {
 	const problems: string[] = [];
 	page.on("pageerror", (e) => problems.push("pageerror: " + e.message));
@@ -22,7 +24,7 @@ test.describe("studio (real admin, in-browser API)", () => {
 
 	test("View Site links to the site under its base path", async ({ page }) => {
 		await open(page);
-		await expect(page.getByRole("link", { name: "View Site" })).toHaveAttribute("href", "/GHDash-example/");
+		await expect(page.getByRole("link", { name: "View Site" })).toHaveAttribute("href", `${BASE}/`);
 	});
 
 	test("loads with the site's collections and no missing routes", async ({ page }) => {

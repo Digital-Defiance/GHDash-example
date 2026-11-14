@@ -2,6 +2,8 @@ import { existsSync } from "node:fs";
 
 import { expect, test } from "@playwright/test";
 
+import { BASE } from "./base";
+
 const pages = ["", "posts/", "pages/about/", "category/development/", "tag/creativity/", "rss.xml"];
 
 test.describe("static site", () => {
@@ -19,7 +21,7 @@ test.describe("static site", () => {
 		await page.goto("");
 		const hrefs = await page.locator("a[href^='/']").evaluateAll((as) => as.map((a) => a.getAttribute("href")!));
 		expect(hrefs.length).toBeGreaterThan(0);
-		for (const h of hrefs) expect(h.startsWith("/GHDash-example/"), h).toBe(true);
+		for (const h of hrefs) expect(h.startsWith(`${BASE}/`), h).toBe(true);
 	});
 
 	test("a post page shows its title", async ({ page }) => {
@@ -48,7 +50,7 @@ test.describe("static site", () => {
 		await page.locator("#search-form").getByRole("button", { name: "Search" }).click();
 		const link = page.locator("#search-list a").first();
 		await expect(link).toContainText(/weekend/i);
-		expect(await link.getAttribute("href")).toMatch(/^\/GHDash-example\/posts\/.+/);
+		expect(await link.getAttribute("href")).toMatch(new RegExp(`^${BASE}/posts/.+`));
 		await link.click();
 		await expect(page.locator("h1").first()).toContainText(/weekend/i);
 	});
@@ -63,12 +65,12 @@ test.describe("static site", () => {
 		const sitemap = await (await request.get("sitemap.xml")).text();
 		const locs = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]!);
 		expect(locs.length).toBeGreaterThan(3);
-		for (const l of locs) expect(l.startsWith(`${origin}/GHDash-example/`), l).toBe(true);
+		for (const l of locs) expect(l.startsWith(`${origin}${BASE}/`), l).toBe(true);
 		const robots = await (await request.get("robots.txt")).text();
-		expect(robots).toContain(`Sitemap: ${origin}/GHDash-example/sitemap.xml`);
+		expect(robots).toContain(`Sitemap: ${origin}${BASE}/sitemap.xml`);
 		expect(robots).toContain("Disallow: /studio/");
 		const rss = await (await request.get("rss.xml")).text();
-		expect(rss).toMatch(/<link>[^<]*\/GHDash-example\/posts\/[^<]+<\/link>/);
+		expect(rss).toMatch(new RegExp(`<link>[^<]*${BASE}/posts/[^<]+</link>`));
 	});
 
 	test("a post shows the discussion thread only when giscus is configured", async ({ page }) => {
