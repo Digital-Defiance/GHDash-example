@@ -5,7 +5,7 @@ import { readFileSync } from "node:fs";
 import { before, test } from "node:test";
 
 import { openDb } from "@digital-defiance/ghdash-pages/studio/load-db.js";
-import { applyFile, diffFiles, expandLegacyRevisions, filesFromContent, mergeRemote, revisionPathsFor, snapshot, visibleChanges } from "@digital-defiance/ghdash-pages/studio/tray.js";
+import { applyDdl, applyFile, diffFiles, expandLegacyRevisions, filesFromContent, mergeRemote, revisionPathsFor, snapshot, visibleChanges } from "@digital-defiance/ghdash-pages/studio/tray.js";
 
 let sqlite, content, empty;
 before(async () => {
@@ -101,4 +101,20 @@ test("an older revisions.json from the repo expands into per-row files", () => {
 	const files = new Map([["revisions.json", JSON.stringify([{ id: "a", entry_id: "e" }, { id: "b", entry_id: "e" }])]]);
 	expandLegacyRevisions(files);
 	assert.deepEqual([...files.keys()].sort(), ["revisions/a.json", "revisions/b.json"]);
+});
+
+test("a column added by a schema change can be restored into a freshly loaded database", () => {
+	const first = open();
+	const base = snapshot(first.db, first.freshNames);
+	first.db.exec("alter table ec_posts add column accent_color TEXT");
+	first.db.exec("update ec_posts set accent_color = '#ff0000' where slug = 'work-in-progress'");
+	const saved = snapshot(first.db, first.freshNames);
+	const changed = diffFiles(base, saved).map((c) => c.path);
+
+	const second = open();
+	assert.throws(() => applyFile(second.db, changed.find((p) => p.startsWith("ec_posts/")), saved.get(changed.find((p) => p.startsWith("ec_posts/")))));
+	applyDdl(second.db, saved.get("_ddl.json"));
+	for (const path of changed) applyFile(second.db, path, saved.get(path));
+	assert.deepEqual(diffFiles(saved, snapshot(second.db, second.freshNames)).filter((c) => c.path !== "_ddl.json"), []);
+	assert.equal(second.db.selectValue("select accent_color from ec_posts where slug = 'work-in-progress'"), "#ff0000");
 });
