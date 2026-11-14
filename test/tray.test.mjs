@@ -118,3 +118,15 @@ test("a column added by a schema change can be restored into a freshly loaded da
 	assert.deepEqual(diffFiles(saved, snapshot(second.db, second.freshNames)).filter((c) => c.path !== "_ddl.json"), []);
 	assert.equal(second.db.selectValue("select accent_color from ec_posts where slug = 'work-in-progress'"), "#ff0000");
 });
+
+test("encrypted plugin secret settings never show up as a change", () => {
+	const { db, freshNames } = open();
+	const base = snapshot(db, freshNames);
+	const envelope = JSON.stringify({ $emdash: "plugin-setting", v: 1, kid: "k", iv: "aa", ciphertext: "bb" });
+	db.exec(`insert into options (name, value) values ('plugin:webhook-notifier:settings:secretToken', '${envelope}')`);
+	db.exec(`insert into options (name, value) values ('plugin:webhook-notifier:settings:events', '"content"')`);
+	const diff = diffFiles(base, snapshot(db, freshNames));
+	assert.deepEqual(diff.map((d) => d.path), ["options.json"]);
+	assert.ok(!snapshot(db, freshNames).get("options.json").includes("secretToken"));
+	assert.ok(snapshot(db, freshNames).get("options.json").includes("settings:events"));
+});
