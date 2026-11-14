@@ -15,3 +15,4 @@ public/studio-api/
 test-results/
 playwright-report/
 public/media/
+public/studio/media-sw.js
