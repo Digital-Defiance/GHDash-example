@@ -4,8 +4,8 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { before, test } from "node:test";
 
-import { openDb } from "@digital-defiance/ghdash-pages/studio/load-db.js";
-import { applyDdl, applyFile, diffFiles, expandLegacyRevisions, filesFromContent, mergeRemote, revisionPathsFor, snapshot, visibleChanges } from "@digital-defiance/ghdash-pages/studio/tray.js";
+import { openDb } from "@digitaldefiance/ghdash-pages/studio/load-db.js";
+import { applyDdl, applyFile, diffFiles, expandLegacyRevisions, filesFromContent, mergeRemote, revisionPathsFor, snapshot, visibleChanges } from "@digitaldefiance/ghdash-pages/studio/tray.js";
 
 let sqlite, content, empty;
 before(async () => {
