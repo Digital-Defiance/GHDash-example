@@ -11,7 +11,8 @@
     "db": "node scripts/build-db.mjs",
     "build": "npm run db && node scripts/studio-assets.mjs && astro build && node scripts/rebase-urls.mjs dist/client",
     "preview": "npx serve dist/client",
-    "export-content": "node scripts/db-json.mjs export data.db content"
+    "export-content": "node scripts/db-json.mjs export data.db content",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@astrojs/node": "11.1.5",
@@ -24,6 +25,7 @@
     "react-dom": "19.2.4"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "lightningcss": "1.33.0"
   },
   "engines": {

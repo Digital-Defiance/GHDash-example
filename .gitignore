@@ -12,3 +12,5 @@ data.db-*
 !.env.example
 public/studio-data/
 public/studio-api/
+test-results/
+playwright-report/
