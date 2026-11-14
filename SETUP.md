@@ -31,6 +31,15 @@ Follow the "Comments (giscus)" steps in the README. Commenters need a GitHub acc
 
 Schedule a post in the studio and the hourly workflow publishes it once its time passes. The workflow asks for `contents: write` itself and commits the published state back to `main`; if your organisation blocks that, set Settings → Actions → General → Workflow permissions to **Read and write**.
 
+## 6. Optional: webhooks when content changes
+
+`hooks.config.json` lists the plugins whose after-hooks run in the build Action. The example config runs the webhook notifier: after a deploy, every post or page that was added, changed or deleted in that push is sent to your URL. To turn it on, add two repository secrets (Settings → Secrets and variables → Actions):
+
+- `WEBHOOK_URL`: where to send the notifications (required).
+- `WEBHOOK_TOKEN`: sent as `Authorization: Bearer ...` (optional).
+
+Without `WEBHOOK_URL` the plugin does nothing. The plugin's settings screen in the studio is not used for this: settings and secrets for hooks come from `hooks.config.json` and the Actions secrets, so no secret is ever stored in the repository. The workflow remembers the last commit it processed in a tag called `hooks-last`, so a cancelled run is caught up by the next one.
+
 ## Keep it current
 
 The admin and browser API come from release assets named in `package.json`. To upgrade, change those URLs to a newer `pages-v*` release and run `npm install`.

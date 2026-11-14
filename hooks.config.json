@@ -1,0 +1,16 @@
+{
+	"site": { "name": "GHDash example", "url": "https://digital-defiance.github.io/GHDash-example/" },
+	"plugins": [
+		{
+			"id": "webhook-notifier",
+			"module": "@emdash-cms/plugin-webhook-notifier/sandbox",
+			"settings": {
+				"webhookUrl": { "env": "WEBHOOK_URL" },
+				"secretToken": { "env": "WEBHOOK_TOKEN" },
+				"enabled": true,
+				"events": "content",
+				"includeData": false
+			}
+		}
+	]
+}

@@ -23,6 +23,8 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       run: ${{ steps.due.outputs.run }}
+      hooks_base: ${{ steps.range.outputs.base || steps.publish.outputs.base }}
+      hooks_head: ${{ steps.publish.outputs.head || steps.range.outputs.head }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -30,6 +32,11 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - id: range
+        if: github.event_name == 'push'
+        run: |
+          echo "base=${{ github.event.before }}" >> "$GITHUB_OUTPUT"
+          echo "head=${{ github.sha }}" >> "$GITHUB_OUTPUT"
       - id: due
         run: |
           if [ "${{ github.event_name }}" = "schedule" ] && [ "$(npx ghdash-pages due)" != "true" ]; then
@@ -55,14 +62,21 @@ jobs:
           done
           exit 1
       - name: Commit scheduled posts that were just published
+        id: publish
         if: steps.due.outputs.run == 'true'
         run: |
           if git diff --quiet -- content; then exit 0; fi
+          before=$(git rev-parse HEAD)
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add content
           git commit -m "Publish scheduled content"
-          git pull --rebase origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}" || echo "Could not push the published state; the next run will publish it again."
+          if git pull --rebase origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}"; then
+            echo "base=$before" >> "$GITHUB_OUTPUT"
+            echo "head=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          else
+            echo "Could not push the published state; the next run will publish it again."
+          fi
       - uses: actions/upload-pages-artifact@v3
         if: steps.due.outputs.run == 'true'
         with:
@@ -78,3 +92,29 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  hooks:
+    needs: [build, deploy]
+    if: needs.deploy.result == 'success' && needs.build.outputs.hooks_head != ''
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.build.outputs.hooks_head }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Run plugin after-hooks for content that changed since the last run
+        env:
+          WEBHOOK_URL: ${{ secrets.WEBHOOK_URL }}
+          WEBHOOK_TOKEN: ${{ secrets.WEBHOOK_TOKEN }}
+        run: |
+          [ -f hooks.config.json ] || { echo "No hooks.config.json, nothing to run."; exit 0; }
+          git fetch --force origin "refs/tags/hooks-last:refs/tags/hooks-last" 2>/dev/null || true
+          base=$(git rev-parse -q --verify hooks-last || echo "${{ needs.build.outputs.hooks_base }}")
+          npx ghdash-pages run-hooks --base "$base" --head HEAD
+          git tag -f hooks-last HEAD
+          git push --force origin refs/tags/hooks-last
