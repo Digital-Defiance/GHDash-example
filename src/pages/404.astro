@@ -3,6 +3,13 @@ import Base from "../layouts/Base.astro";
 ---
 
 <Base title="Page not found">
+	<script is:inline>
+		// Pages serves this file for unknown paths. Studio routes are client-side, so hand them back to the studio entry page.
+		(() => {
+			const m = location.pathname.match(/^(.*\/studio)\/(.+)$/);
+			if (m) location.replace(m[1] + "/?p=" + encodeURIComponent(m[2] + location.search + location.hash));
+		})();
+	</script>
 	<section class="band not-found">
 		<div class="not-found__backdrop" aria-hidden="true"></div>
 		<div class="frame not-found__inner">

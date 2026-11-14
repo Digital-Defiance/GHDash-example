@@ -1,0 +1,28 @@
+---
+// The real EmDash admin, running in the browser with no server. Experimental: see SPEC.md Phase 2b.
+export const prerender = true;
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="robots" content="noindex" />
+		<title>Studio</title>
+		<script is:inline>
+			(() => {
+				const site = location.pathname.replace(/\/studio(\/.*)?$/, "");
+				globalThis.__EMDASH_PATHS__ = { adminBase: site + "/studio", apiBase: site + "/_api" };
+				const deep = new URLSearchParams(location.search).get("p");
+				if (deep) history.replaceState(null, "", site + "/studio/" + deep);
+			})();
+		</script>
+	</head>
+	<body class="isolate">
+		<div id="admin-root" class="min-h-screen"></div>
+		<script>
+			import "../../studio/boot.tsx";
+		</script>
+	</body>
+</html>
