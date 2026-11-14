@@ -87,6 +87,16 @@ test.describe("pending-changes tray", () => {
 		await expect(page.getByTestId("tray-count")).toHaveText("0");
 	});
 
+	test("the token prompt explains which token to create", async ({ page }) => {
+		await openStudio(page);
+		await editWorkInProgress(page, "Tray edit");
+		await page.getByTestId("tray-button").click();
+		await page.getByText("What token do I need?").click();
+		const link = page.getByRole("link", { name: "Create a fine-grained token" });
+		await expect(link).toBeVisible();
+		await expect(link).toHaveAttribute("href", /github\.com\/settings\/personal-access-tokens\/new/);
+	});
+
 	test("pending changes survive a reload", async ({ page }) => {
 		await openStudio(page);
 		await editWorkInProgress(page, "Tray edit");
