@@ -36,9 +36,13 @@ npm run preview
 
 Settings → Pages → Build and deployment → Source: **GitHub Actions**.
 
-## Experimental: the real EmDash admin
+## Experimental: the real EmDash admin at /studio/
 
-The `studio-experiment` branch serves the full EmDash admin at `/studio/`. It is built from the fork's admin package, installed from the `pages-v0.1.0` release assets on `Digital-Defiance/ghdash` (see `package.json` `overrides`). It boots under the repo base path but cannot load data yet, because the in-browser API that answers its `/_api/*` calls is still being built (TODO 2b.4). The plan is to run EmDash's own handlers on SQLite compiled to WebAssembly, loaded from `content/`, collect edits as pending changes (a toolbar icon with a count and a dropdown list), and commit them in one go.
+`https://<owner>.github.io/<repo>/studio/` runs EmDash's own admin in the browser, with no server. Its API runs in the page on SQLite compiled to WebAssembly, loaded from `content/`. Edits collect as pending changes: a toolbar icon shows the count, and its dropdown lists every new, edited or deleted item with a Discard button. Paste a fine-grained token (Contents: read and write, this repo only; kept in the tab) and Commit writes all of them as one commit. The Action then rebuilds the site. If someone else pushed meanwhile, your changes are kept and "Update my copy" folds theirs in.
+
+The admin and the browser API are installed from the `pages-v*` release assets on `Digital-Defiance/ghdash` (see `package.json` `overrides` and `scripts/fetch-browser-api.mjs`). Pending changes survive a reload (IndexedDB).
+
+Limits: schema changes (new content types or fields) can be committed but not merged or discarded, media upload is untested, and users, passkeys and other server-only screens do nothing here. Run `npm test` for unit tests and `npm run test:e2e` for the browser suite.
 
 ## Known gaps (see TODO.md Phases 1 to 3)
 
@@ -46,7 +50,7 @@ The `studio-experiment` branch serves the full EmDash admin at `/studio/`. It is
 - Lists show the first page only, because `?cursor=` pagination needs a server.
 - Media is not copied or optimised at build time yet.
 - Comments are not wired up yet. They will use giscus.
-- `/admin/` is a minimal editor; `/studio/` (above) is the full admin and is not usable yet.
+- `/admin/` is a minimal editor; `/studio/` (above) is the full admin and is still experimental.
 
 Live site: https://digital-defiance.github.io/GHDash-example/
 
