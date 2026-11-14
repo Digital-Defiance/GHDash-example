@@ -209,3 +209,22 @@ test.describe("pending-changes tray", () => {
 		await expect(page.getByTestId("tray-list")).toContainText("Edited");
 	});
 });
+
+test("an uploaded image that is not committed yet loads from the CMS media URL inside the studio", async ({ page }) => {
+	const png = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==", "base64");
+	await openStudio(page);
+	await page.getByRole("link", { name: "Media" }).first().click();
+	await upload(page, "inline.png", png);
+	await page.evaluate(() => navigator.serviceWorker.ready);
+	await expect.poll(() => page.evaluate(() => !!navigator.serviceWorker.controller)).toBe(true);
+	const width = await page.evaluate(async () => {
+		const { fetch: f, apiBase } = (globalThis as any).__EMDASH_PATHS__;
+		const list = await (await f(`${apiBase}/media`, { headers: { "X-EmDash-Request": "1" } })).json();
+		const key = list.data.items[0].storageKey;
+		const img = new Image();
+		img.src = `/_emdash/api/media/file/${key}`;
+		await img.decode();
+		return img.naturalWidth;
+	});
+	expect(width).toBe(1);
+});
