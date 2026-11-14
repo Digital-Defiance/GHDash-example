@@ -8,23 +8,22 @@ import { join } from "node:path";
 const base = (process.env.BASE_PATH ?? "/").replace(/\/+$/, "");
 const dir = process.argv[2];
 if (!dir) throw new Error("usage: rebase-urls.mjs <distDir>");
-if (!base) {
-	console.log("BASE_PATH not set, nothing to rebase");
-	process.exit(0);
-}
 
 // A root-absolute URL that doesn't already start with the base and isn't protocol-relative.
-const prefix = new RegExp(`((?:href|src|action|content|poster)=["'])/(?!/|${base.slice(1)}(?:/|["'?#]))`, "g");
+const prefix = base ? new RegExp(`((?:href|src|action|content|poster)=["'])/(?!/|${base.slice(1)}(?:/|["'?#]))`, "g") : null;
 const walk = (d) =>
 	readdirSync(d).flatMap((n) => {
 		const p = join(d, n);
 		return statSync(p).isDirectory() ? walk(p) : [p];
 	});
 
+// The CMS renders media as /_emdash/api/media/file/<key>; on this site those are static files under media/.
+const mediaUrl = /\/_emdash\/api\/media\/file\//g;
+
 let changed = 0;
 for (const f of walk(dir).filter((f) => /\.(html|xml)$/.test(f))) {
 	const before = readFileSync(f, "utf8");
-	const after = before.replace(prefix, `$1${base}/`);
+	const after = before.replace(mediaUrl, `${base}/media/`).replace(prefix ?? /(?!)/g, `$1${base}/`);
 	if (after !== before) {
 		writeFileSync(f, after);
 		changed++;

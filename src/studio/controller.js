@@ -30,7 +30,10 @@ function idb(name = "ghdash-studio") {
 	};
 }
 
-export function createController({ db, freshNames, baseFiles, meta, fetchImpl = globalThis.fetch.bind(globalThis), storage = safe(() => sessionStorage, null), store = safe(() => idb(), null) }) {
+const MEDIA = "@media/";
+const mediaRows = (files) => { const t = files.get("media.json"); return t ? JSON.parse(t) : []; };
+
+export function createController({ db, freshNames, baseFiles, meta, pendingMedia = new Map(), fetchImpl = globalThis.fetch.bind(globalThis), storage = safe(() => sessionStorage, null), store = safe(() => idb(), null) }) {
 	const [owner, repo] = meta.repo.split("/");
 	const prefix = "content/";
 	let base = baseFiles;
@@ -43,19 +46,37 @@ export function createController({ db, freshNames, baseFiles, meta, fetchImpl = 
 	const storeKey = `${meta.repo}#${meta.branch}`;
 	const token = () => storage?.getItem(TOKEN_KEY) ?? null;
 
+	/** Uploads and deletions of media files, shown as their own changes instead of the media table's rows. */
+	function mediaDiff(cur) {
+		const before = new Map(mediaRows(base).map((r) => [r.storage_key, r]));
+		const after = new Map(mediaRows(cur).map((r) => [r.storage_key, r]));
+		const out = [];
+		for (const [key, row] of after) if (!before.has(key) && pendingMedia.has(key)) out.push({ path: MEDIA + key, kind: "added", group: "Media", label: row.filename || key, discardable: true });
+		for (const [key, row] of before) if (!after.has(key)) out.push({ path: MEDIA + key, kind: "deleted", group: "Media", label: row.filename || key, discardable: true });
+		return out;
+	}
+
+	function changesFor(cur) {
+		const media = mediaDiff(cur);
+		const json = diffFiles(base, cur);
+		return media.length ? [...json.filter((c) => c.path !== "media.json"), ...media].sort((a, b) => a.group.localeCompare(b.group) || a.label.localeCompare(b.label)) : json;
+	}
+
 	async function persist(cur) {
 		if (!store) return;
 		const files = {};
 		for (const c of diffFiles(base, cur)) files[c.path] = cur.get(c.path) ?? null;
+		const media = {};
+		for (const c of mediaDiff(cur)) if (c.kind === "added") media[c.path.slice(MEDIA.length)] = pendingMedia.get(c.path.slice(MEDIA.length));
 		try {
-			if (Object.keys(files).length) await store.set(storeKey, { head, files });
+			if (Object.keys(files).length) await store.set(storeKey, { head, files, media });
 			else await store.del(storeKey);
 		} catch { /* IndexedDB can be blocked; the in-memory state still works */ }
 	}
 
 	function refresh() {
 		const cur = snapshot(db, freshNames);
-		set({ changes: diffFiles(base, cur) });
+		set({ changes: changesFor(cur) });
 		void persist(cur);
 	}
 
@@ -67,6 +88,7 @@ export function createController({ db, freshNames, baseFiles, meta, fetchImpl = 
 		const saved = await store.get(storeKey).catch(() => null);
 		if (!saved) return;
 		if (saved.head !== head) { await store.del(storeKey).catch(() => {}); return; }
+		for (const [key, file] of Object.entries(saved.media ?? {})) pendingMedia.set(key, file);
 		for (const [path, text] of Object.entries(saved.files)) applyFile(db, path, text);
 		refresh();
 		changedExternally();
@@ -111,6 +133,19 @@ export function createController({ db, freshNames, baseFiles, meta, fetchImpl = 
 		}
 	}
 
+	function discardOne(path) {
+		if (!path.startsWith(MEDIA)) { applyFile(db, path, base.get(path) ?? null); return; }
+		const key = path.slice(MEDIA.length);
+		const row = mediaRows(base).find((r) => r.storage_key === key);
+		if (row) {
+			const cols = Object.keys(row);
+			db.exec({ sql: `insert or replace into media (${cols.map((c) => `"${c}"`).join(",")}) values (${cols.map(() => "?").join(",")})`, bind: cols.map((c) => (typeof row[c] === "boolean" ? Number(row[c]) : row[c])) });
+		} else {
+			db.exec({ sql: "delete from media where storage_key = ?", bind: [key] });
+			pendingMedia.delete(key);
+		}
+	}
+
 	function describeError(e) {
 		if (e instanceof GitHubError) {
 			if (e.status === 401) { storage?.removeItem(TOKEN_KEY); set({ hasToken: false }); return "GitHub rejected the token. Paste a new one."; }
@@ -127,12 +162,12 @@ export function createController({ db, freshNames, baseFiles, meta, fetchImpl = 
 		/** Called when the database changed behind the admin's back, so it can drop cached screens. */
 		onExternalChange(l) { external.add(l); return () => external.delete(l); },
 		discard(path) {
-			applyFile(db, path, base.get(path) ?? null);
+			discardOne(path);
 			refresh();
 			changedExternally();
 		},
 		discardAll() {
-			for (const c of state.changes) if (c.discardable) applyFile(db, c.path, base.get(c.path) ?? null);
+			for (const c of state.changes) if (c.discardable) discardOne(c.path);
 			refresh();
 			changedExternally();
 		},
@@ -154,6 +189,7 @@ export function createController({ db, freshNames, baseFiles, meta, fetchImpl = 
 			const cur = snapshot(db, freshNames);
 			const files = {};
 			for (const c of diffFiles(base, cur)) files[prefix + c.path] = cur.get(c.path) ?? null;
+			for (const c of mediaDiff(cur)) files[c.path.slice(1)] = c.kind === "added" ? pendingMedia.get(c.path.slice(MEDIA.length)).bytes : null;
 			try {
 				const r = await commitFiles({ token: token(), owner, repo, branch: meta.branch, files, message: message || "Update content from the studio", expectedHeadSha: head, fetchImpl });
 				if (!r.ok) { set({ status: { kind: "conflict", remoteHead: r.headSha } }); return; }
