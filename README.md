@@ -36,11 +36,18 @@ npm run preview
 
 Settings → Pages → Build and deployment → Source: **GitHub Actions**.
 
-## Known gaps (see TODO.md Phase 1–3)
+## Experimental: the real EmDash admin
+
+The `studio-experiment` branch serves the full EmDash admin at `/studio/`. It is built from the fork's admin package, installed from the `pages-v0.1.0` release assets on `Digital-Defiance/ghdash` (see `package.json` `overrides`). It boots under the repo base path but cannot load data yet, because the in-browser API that answers its `/_api/*` calls is still being built (TODO 2b.4). The plan is to run EmDash's own handlers on SQLite compiled to WebAssembly, loaded from `content/`, collect edits as pending changes (a toolbar icon with a count and a dropdown list), and commit them in one go.
+
+## Known gaps (see TODO.md Phases 1 to 3)
 
 - The search page is not available yet. It needs Pagefind.
 - Lists show the first page only, because `?cursor=` pagination needs a server.
+- Media is not copied or optimised at build time yet.
 - Comments are not wired up yet. They will use giscus.
-- Editing: `/admin/` is a minimal editor (see below). The full EmDash admin comes later in Phase 2.
+- `/admin/` is a minimal editor; `/studio/` (above) is the full admin and is not usable yet.
+
+Live site: https://digital-defiance.github.io/GHDash-example/
 
 Regenerate `content/` from a local EmDash database with `npm run export-content` after editing in `emdash dev` or the CLI.
