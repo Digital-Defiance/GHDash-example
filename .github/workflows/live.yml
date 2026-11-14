@@ -1,0 +1,38 @@
+name: Live GitHub test
+
+# Runs test/live.mjs against this repo with a real token: commits on a scratch branch
+# (studio-live-test-<time>), checks commit, conflict and update-from-remote, then deletes the branch.
+# Needs the GHDASH_LIVE_TOKEN Actions secret: a fine-grained token with Contents read/write on this repo.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: live-test
+  cancel-in-progress: false
+
+jobs:
+  live:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Build studio data
+        run: npm run db && npx ghdash-pages studio-assets
+      - name: Check the secret is set
+        env:
+          GH_TOKEN: ${{ secrets.GHDASH_LIVE_TOKEN }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::error::Add a GHDASH_LIVE_TOKEN secret (Settings > Secrets and variables > Actions)"; exit 1
+          fi
+      - name: Live test
+        env:
+          GH_TOKEN: ${{ secrets.GHDASH_LIVE_TOKEN }}
+        run: node test/live.mjs
