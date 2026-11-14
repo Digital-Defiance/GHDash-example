@@ -44,6 +44,10 @@ Without `WEBHOOK_URL` the plugin does nothing. The plugin's settings screen in t
 
 A plugin entry in `hooks.config.json` can list `cron` jobs, for example `"cron": [{ "name": "weekly-digest", "schedule": "0 9 * * 1" }]` (UTC, five fields, or `@hourly`, `@daily`, `@weekly`). The hourly workflow runs the plugin's `cron` hook for each job that fell due since the last run, so a job fires within about an hour of its time. Only plugins whose hooks work without a server, content access or public routes can run here.
 
+## 8. Optional: bring in an existing Jekyll or Markdown site
+
+From the root of your site, run `npx ghdash-pages import-markdown ../your-old-site --dry-run` to see what it finds, then run it again without `--dry-run`. It writes posts, drafts and pages (with tags, dates and local images) into `content/` and `media/`. Look over `git diff`, commit, and the Action publishes them. Running it twice is safe: entries that already exist are skipped. Liquid tags that have no static equivalent are removed and listed as warnings.
+
 ## Keep it current
 
 The admin and browser API come from release assets named in `package.json`. To upgrade, change those URLs to a newer `pages-v*` release and run `npm install`.
