@@ -4,10 +4,13 @@ on:
   push:
     branches: [main]
     paths-ignore: ["README.md"]
+  schedule:
+    # Hourly: publishes scheduled posts when their time has passed. Skips the build when nothing is due.
+    - cron: "17 * * * *"
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -18,16 +21,28 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      run: ${{ steps.due.outputs.run }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
-      - id: pages
-        uses: actions/configure-pages@v5
       - run: npm ci
+      - id: due
+        run: |
+          if [ "${{ github.event_name }}" = "schedule" ] && [ "$(npx ghdash-pages due)" != "true" ]; then
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            echo "No scheduled content is due, skipping the build."
+          else
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          fi
+      - id: pages
+        if: steps.due.outputs.run == 'true'
+        uses: actions/configure-pages@v5
       - name: Build (content/*.json -> SQLite -> static site)
+        if: steps.due.outputs.run == 'true'
         env:
           NODE_OPTIONS: --max-old-space-size=4096
           SITE_URL: ${{ steps.pages.outputs.origin }}
@@ -39,12 +54,23 @@ jobs:
             echo "build attempt $attempt failed, retrying"; sleep 10
           done
           exit 1
+      - name: Commit scheduled posts that were just published
+        if: steps.due.outputs.run == 'true'
+        run: |
+          if git diff --quiet -- content; then exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add content
+          git commit -m "Publish scheduled content"
+          git pull --rebase origin "${GITHUB_REF_NAME}" && git push origin "HEAD:${GITHUB_REF_NAME}" || echo "Could not push the published state; the next run will publish it again."
       - uses: actions/upload-pages-artifact@v3
+        if: steps.due.outputs.run == 'true'
         with:
           path: dist/client
 
   deploy:
     needs: build
+    if: needs.build.outputs.run == 'true'
     runs-on: ubuntu-latest
     environment:
       name: github-pages

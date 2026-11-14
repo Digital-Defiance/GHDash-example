@@ -20,6 +20,11 @@ async function open(page: Page) {
 test.describe("studio (real admin, in-browser API)", () => {
 	test.skip(!existsSync("dist/client/studio-api/entry.js"), "browser API bundle not built into dist/client/studio-api");
 
+	test("View Site links to the site under its base path", async ({ page }) => {
+		await open(page);
+		await expect(page.getByRole("link", { name: "View Site" })).toHaveAttribute("href", "/GHDash-example/");
+	});
+
 	test("loads with the site's collections and no missing routes", async ({ page }) => {
 		const problems = watch(page);
 		await open(page);

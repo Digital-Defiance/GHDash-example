@@ -181,4 +181,21 @@ test.describe("pending-changes tray", () => {
 		await page.getByRole("button", { name: "Discard gone.png" }).click();
 		await expect(page.getByTestId("tray-count")).toHaveText("0");
 	});
+
+	test("scheduling a post shows up as a pending change", async ({ page }) => {
+		await openStudio(page);
+		const result = await page.evaluate(async () => {
+			const { fetch: f, apiBase } = (globalThis as any).__EMDASH_PATHS__;
+			const h = { "X-EmDash-Request": "1", "Content-Type": "application/json" };
+			const list = await (await f(`${apiBase}/content/posts?status=draft&limit=5`, { headers: h })).json();
+			const id = list.data.items[0].id;
+			const res = await f(`${apiBase}/content/posts/${id}/schedule`, { method: "POST", headers: h, body: JSON.stringify({ scheduledAt: "2099-01-01T00:00:00.000Z" }) });
+			return { status: res.status, item: (await res.json()).data?.item };
+		});
+		expect(result.status).toBe(200);
+		expect(result.item.status).toBe("scheduled");
+		await expect(page.getByTestId("tray-count")).toHaveText("1");
+		await page.getByTestId("tray-button").click();
+		await expect(page.getByTestId("tray-list")).toContainText("Edited");
+	});
 });
