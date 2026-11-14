@@ -9,7 +9,7 @@ function watch(page: Page) {
 	page.on("pageerror", (e) => problems.push("pageerror: " + e.message));
 	page.on("console", (m) => {
 		const t = m.text();
-		if (t.includes("[browser-api]")) problems.push(t.slice(0, 200));
+		if (t.includes("[browser-api]") || t.includes("Content Security Policy")) problems.push(t.slice(0, 200));
 	});
 	return problems;
 }
