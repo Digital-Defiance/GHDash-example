@@ -1,0 +1,10 @@
+{
+	"author_id": null,
+	"collection": "pages",
+	"created_at": "2026-11-14 00:01:41",
+	"data": "{\"title\":\"About\",\"content\":[{\"_type\":\"block\",\"style\":\"normal\",\"children\":[{\"_type\":\"span\",\"text\":\"A place for writing about software, design, and the occasional stray thought. No posting schedule, no newsletter funnel. Just things I wanted to write down.\",\"_key\":\"k1\"}],\"_key\":\"k0\"},{\"_type\":\"block\",\"style\":\"normal\",\"children\":[{\"_type\":\"span\",\"text\":\"Built with Astro and EmDash. The source is open if you want to see how it works.\",\"_key\":\"k3\"}],\"_key\":\"k2\"}]}",
+	"edited_by": null,
+	"entry_id": "01M7BNR8H2QRVETBHM6D04T52Y",
+	"id": "01M7BNR8H129KVM4FVZ7M2Y6Z3",
+	"kind": null
+}

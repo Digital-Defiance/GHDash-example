@@ -5,7 +5,7 @@ import { readFileSync } from "node:fs";
 import { before, test } from "node:test";
 
 import { openDb } from "@digital-defiance/ghdash-pages/studio/load-db.js";
-import { applyFile, diffFiles, filesFromContent, mergeRemote, snapshot } from "@digital-defiance/ghdash-pages/studio/tray.js";
+import { applyFile, diffFiles, expandLegacyRevisions, filesFromContent, mergeRemote, revisionPathsFor, snapshot, visibleChanges } from "@digital-defiance/ghdash-pages/studio/tray.js";
 
 let sqlite, content, empty;
 before(async () => {
@@ -74,4 +74,31 @@ test("mergeRemote takes remote-only changes and keeps clashing local ones", () =
 	const idA = a.split("/")[1].replace(".json", "");
 	assert.equal(db.selectValue("select title from ec_posts where id = ?", [idA]), "Remote A");
 	assert.equal(db.selectValue("select title from ec_posts where id = ?", [idB]), "Local B");
+});
+
+test("revisions are one file per row, so saving one post changes one revision file", () => {
+	const { db, freshNames } = open();
+	const paths = [...snapshot(db, freshNames).keys()];
+	assert.ok(paths.some((p) => p.startsWith("revisions/")));
+	assert.ok(!paths.includes("revisions.json"));
+});
+
+test("a revision of a changed post is folded into the post's change, and discard restores both", () => {
+	const { db, freshNames } = open();
+	const base = snapshot(db, freshNames);
+	const post = db.selectObject("select id from ec_posts where slug = 'work-in-progress'");
+	db.exec({ sql: "update ec_posts set title = 'Changed' where id = ?", bind: [post.id] });
+	db.exec({ sql: "insert into revisions (id, collection, entry_id, data, created_at) values ('rev-test', 'posts', ?, '{\"title\":\"Changed\"}', '2026-01-01 00:00:00')", bind: [post.id] });
+	const cur = snapshot(db, freshNames);
+	assert.equal(diffFiles(base, cur).length, 2);
+	assert.equal(visibleChanges(base, cur).length, 1);
+	for (const p of revisionPathsFor(base, cur, `ec_posts/${post.id}.json`)) applyFile(db, p, base.get(p) ?? null);
+	applyFile(db, `ec_posts/${post.id}.json`, base.get(`ec_posts/${post.id}.json`));
+	assert.deepEqual(diffFiles(base, snapshot(db, freshNames)), []);
+});
+
+test("an older revisions.json from the repo expands into per-row files", () => {
+	const files = new Map([["revisions.json", JSON.stringify([{ id: "a", entry_id: "e" }, { id: "b", entry_id: "e" }])]]);
+	expandLegacyRevisions(files);
+	assert.deepEqual([...files.keys()].sort(), ["revisions/a.json", "revisions/b.json"]);
 });
