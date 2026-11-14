@@ -1,3 +1,5 @@
+import { existsSync } from "node:fs";
+
 import { expect, test } from "@playwright/test";
 
 const pages = ["", "posts/", "pages/about/", "category/development/", "tag/creativity/", "rss.xml"];
@@ -67,5 +69,17 @@ test.describe("static site", () => {
 		expect(robots).toContain("Disallow: /studio/");
 		const rss = await (await request.get("rss.xml")).text();
 		expect(rss).toMatch(/<link>[^<]*\/GHDash-example\/posts\/[^<]+<\/link>/);
+	});
+
+	test("a post shows the discussion thread only when giscus is configured", async ({ page }) => {
+		await page.goto("posts/notes-on-simplicity/");
+		const script = page.locator('script[src="https://giscus.app/client.js"]');
+		if (existsSync("giscus.json")) {
+			await expect(script).toHaveAttribute("data-term", "notes-on-simplicity");
+			await expect(page.getByRole("heading", { name: "Discussion" })).toBeVisible();
+		} else {
+			await expect(script).toHaveCount(0);
+			await expect(page.getByRole("heading", { name: "Discussion" })).toHaveCount(0);
+		}
 	});
 });
