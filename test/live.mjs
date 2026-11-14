@@ -50,7 +50,7 @@ try {
 	assert.equal(after.parents[0].sha, main);
 	assert.equal(after.message, "Live test: edit a draft");
 	const changed = await api("GET", `/commits/${done.sha}`);
-	assert.deepEqual(changed.files.map((f) => f.filename.replace(/ec_posts\/.+/, "ec_posts/<id>")), ["content/ec_posts/<id>.json"]);
+	assert.deepEqual(changed.files.map((f) => f.filename.replace(/ec_posts\/[^/]+\.json$/, "ec_posts/<id>.json")), ["content/ec_posts/<id>.json"]);
 	console.log("PASS commit: one parent, one file, message kept");
 
 	// Someone else pushes to the branch; our next commit must not overwrite it silently.
