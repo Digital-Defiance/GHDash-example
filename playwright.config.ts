@@ -8,7 +8,7 @@ export default defineConfig({
 	reporter: process.env.CI ? [["github"], ["list"]] : "list",
 	use: { baseURL: `http://localhost:${port}/GHDash-example/`, trace: "off" },
 	webServer: {
-		command: "node scripts/serve-dist.mjs",
+		command: "npx ghdash-pages serve",
 		url: `http://localhost:${port}/GHDash-example/`,
 		reuseExistingServer: !process.env.CI,
 		env: { BASE_PATH: "/GHDash-example", PORT: String(port) },

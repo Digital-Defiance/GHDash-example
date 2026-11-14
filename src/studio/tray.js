@@ -1,6 +1,6 @@
 // Pending-changes logic: turns the in-browser database into the repo's JSON files, diffs them against
 // the files it was loaded from, and applies files back to the database (discard, merge).
-// The file layout and skip rules mirror scripts/db-json.mjs, which writes content/ at build time.
+// The file layout and skip rules mirror ghdash-pages lib/db-json.mjs, which writes content/ at build time.
 
 const SKIP = [
 	/^_emdash_fts_/,

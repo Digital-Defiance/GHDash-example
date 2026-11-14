@@ -1,4 +1,4 @@
-// node --test test/   (needs `npm run db && node scripts/studio-assets.mjs` first)
+// node --test test/   (needs `npm run db && ghdash-pages studio-assets` first)
 import init from "@sqlite.org/sqlite-wasm";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";

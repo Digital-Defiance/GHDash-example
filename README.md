@@ -7,7 +7,7 @@ Design and progress: [SPEC.md and TODO.md in the main repo](https://github.com/D
 ## How it works
 
 ```
-content/*.json  ──►  scripts/build-db.mjs  ──►  data.db (SQLite)  ──►  astro build  ──►  dist/client  ──►  Pages
+content/*.json  ──►  ghdash-pages build-db  ──►  data.db (SQLite)  ──►  astro build  ──►  dist/client  ──►  Pages
  (this repo)         emdash init + import        throwaway, in CI       static pages
 ```
 
@@ -40,7 +40,7 @@ Settings → Pages → Build and deployment → Source: **GitHub Actions**.
 
 `https://<owner>.github.io/<repo>/studio/` runs EmDash's own admin in the browser, with no server. Its API runs in the page on SQLite compiled to WebAssembly, loaded from `content/`. Edits collect as pending changes: a toolbar icon shows the count, and its dropdown lists every new, edited or deleted item with a Discard button. Paste a fine-grained token (Contents: read and write, this repo only; kept in the tab) and Commit writes all of them as one commit. The Action then rebuilds the site. If someone else pushed meanwhile, your changes are kept and "Update my copy" folds theirs in.
 
-The admin and the browser API are installed from the `pages-v*` release assets on `Digital-Defiance/ghdash` (see `package.json` `overrides` and `scripts/fetch-browser-api.mjs`). Pending changes survive a reload (IndexedDB).
+The admin and the browser API are installed from the `pages-v*` release assets on `Digital-Defiance/ghdash` (see `package.json` `overrides` and the `ghdash-pages` package, which holds the build scripts). Pending changes survive a reload (IndexedDB).
 
 Limits: schema changes (new content types or fields) can be committed but not merged or discarded, media upload is untested, and users, passkeys and other server-only screens do nothing here. Run `npm test` for unit tests and `npm run test:e2e` for the browser suite.
 
