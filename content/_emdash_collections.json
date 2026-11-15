@@ -52,5 +52,32 @@
 		"title_field": null,
 		"updated_at": "2026-11-14 00:01:41",
 		"url_pattern": "/pages/{slug}"
+	},
+	{
+		"admin_config": null,
+		"comments_auto_approve_users": 1,
+		"comments_closed_after_days": 90,
+		"comments_enabled": 0,
+		"comments_moderation": "first_time",
+		"created_at": "2026-11-15 00:29:40",
+		"date_field": null,
+		"description": null,
+		"edit_locking": 1,
+		"has_seo": 0,
+		"hidden": 0,
+		"icon": null,
+		"id": "01M7E9R72PMDFT0PNVHPN399JZ",
+		"label": "Team",
+		"label_singular": "Team member",
+		"nav_group": null,
+		"routable": 1,
+		"search_config": null,
+		"slug": "team",
+		"sort_order": null,
+		"source": "manual",
+		"supports": "[\"drafts\",\"revisions\",\"search\"]",
+		"title_field": null,
+		"updated_at": "2026-11-15 00:29:40",
+		"url_pattern": null
 	}
 ]

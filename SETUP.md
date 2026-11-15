@@ -90,6 +90,12 @@ Limits in the static studio:
 - Images are not downloaded from the old site. Browsers block those requests (CORS), so image links keep pointing at the old site until you upload copies through the media library.
 - Authors can't be mapped to users, because there is no user list on a static site. Posts are imported unassigned.
 
+## 12. Optional: a team page
+
+`/team` lists the members of the `team` collection (name, position, department, photo, hover photo, bio, expandable "more info", an accent color, an order number and social links). Each member also gets a page at `/team/<slug>`. Edit members in the studio like any other content. Unpublished members are hidden. The `TeamGrid` component takes `layout` (grid or list), `shape` (round or square), `photoPosition` (top, side or banner) and `filter` (department buttons).
+
+To add the collection to a different site, run `node scripts/add-team.mjs` in its root; it creates the fields and three sample members.
+
 ## Keep it current
 
 The admin and browser API come from release assets named in `package.json`. To upgrade, change those URLs to a newer `pages-v*` release and run `npm install`.

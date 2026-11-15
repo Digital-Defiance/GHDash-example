@@ -151,6 +151,81 @@
 	},
 	{
 		"type": "index",
+		"name": "idx_ec_team_author",
+		"sql": "CREATE INDEX \"idx_ec_team_author\"\n\t\t\tON \"ec_team\" (author_id)\n\t\t"
+	},
+	{
+		"type": "index",
+		"name": "idx_ec_team_del_sched",
+		"sql": "CREATE INDEX \"idx_ec_team_del_sched\"\n\t\t\tON \"ec_team\" (deleted_at, scheduled_at)\n\t\t\tWHERE scheduled_at IS NOT NULL\n\t\t"
+	},
+	{
+		"type": "index",
+		"name": "idx_ec_team_del_tg_locale",
+		"sql": "CREATE INDEX \"idx_ec_team_del_tg_locale\"\n\t\t\tON \"ec_team\" (deleted_at, translation_group, locale)\n\t\t"
+	},
+	{
+		"type": "index",
+		"name": "idx_ec_team_deleted_created_id",
+		"sql": "CREATE INDEX \"idx_ec_team_deleted_created_id\"\n\t\t\tON \"ec_team\" (deleted_at, created_at DESC, id DESC)\n\t\t"
+	},
+	{
+		"type": "index",
+		"name": "idx_ec_team_deleted_published_id",
+		"sql": "CREATE INDEX \"idx_ec_team_deleted_published_id\"\n\t\t\tON \"ec_team\" (deleted_at, published_at DESC, id DESC)\n\t\t"
+	},
+	{
+		"type": "index",
+		"name": "idx_ec_team_deleted_status",
+		"sql": "CREATE INDEX \"idx_ec_team_deleted_status\"\n\t\t\tON \"ec_team\" (deleted_at, status)\n\t\t"
+	},
+	{
+		"type": "index",
+		"name": "idx_ec_team_deleted_updated_id",
+		"sql": "CREATE INDEX \"idx_ec_team_deleted_updated_id\"\n\t\t\tON \"ec_team\" (deleted_at, updated_at DESC, id DESC)\n\t\t"
+	},
+	{
+		"type": "index",
+		"name": "idx_ec_team_draft_revision",
+		"sql": "CREATE INDEX \"idx_ec_team_draft_revision\"\n\t\t\tON \"ec_team\" (draft_revision_id)\n\t\t"
+	},
+	{
+		"type": "index",
+		"name": "idx_ec_team_live_revision",
+		"sql": "CREATE INDEX \"idx_ec_team_live_revision\"\n\t\t\tON \"ec_team\" (live_revision_id)\n\t\t"
+	},
+	{
+		"type": "index",
+		"name": "idx_ec_team_loc_crt",
+		"sql": "CREATE INDEX \"idx_ec_team_loc_crt\"\n\t\t\tON \"ec_team\" (deleted_at, locale, created_at DESC, id DESC)\n\t\t"
+	},
+	{
+		"type": "index",
+		"name": "idx_ec_team_loc_upd",
+		"sql": "CREATE INDEX \"idx_ec_team_loc_upd\"\n\t\t\tON \"ec_team\" (deleted_at, locale, updated_at DESC, id DESC)\n\t\t"
+	},
+	{
+		"type": "index",
+		"name": "idx_ec_team_locale",
+		"sql": "CREATE INDEX \"idx_ec_team_locale\"\n\t\t\tON \"ec_team\" (locale)\n\t\t"
+	},
+	{
+		"type": "index",
+		"name": "idx_ec_team_primary_byline",
+		"sql": "CREATE INDEX \"idx_ec_team_primary_byline\"\n\t\t\tON \"ec_team\" (primary_byline_id)\n\t\t"
+	},
+	{
+		"type": "index",
+		"name": "idx_ec_team_slug",
+		"sql": "CREATE INDEX \"idx_ec_team_slug\"\n\t\t\tON \"ec_team\" (slug)\n\t\t"
+	},
+	{
+		"type": "index",
+		"name": "idx_ec_team_tg_locale",
+		"sql": "CREATE INDEX \"idx_ec_team_tg_locale\"\n\t\t\tON \"ec_team\" (translation_group, locale)\n\t\t"
+	},
+	{
+		"type": "index",
 		"name": "uidx_ec_pages_active_tg_locale",
 		"sql": "CREATE UNIQUE INDEX \"uidx_ec_pages_active_tg_locale\"\n\t\t\tON \"ec_pages\" (translation_group, lower(locale))\n\t\t\tWHERE deleted_at IS NULL AND translation_group IS NOT NULL\n\t\t"
 	},
@@ -158,6 +233,11 @@
 		"type": "index",
 		"name": "uidx_ec_posts_active_tg_locale",
 		"sql": "CREATE UNIQUE INDEX \"uidx_ec_posts_active_tg_locale\"\n\t\t\tON \"ec_posts\" (translation_group, lower(locale))\n\t\t\tWHERE deleted_at IS NULL AND translation_group IS NOT NULL\n\t\t"
+	},
+	{
+		"type": "index",
+		"name": "uidx_ec_team_active_tg_locale",
+		"sql": "CREATE UNIQUE INDEX \"uidx_ec_team_active_tg_locale\"\n\t\t\tON \"ec_team\" (translation_group, lower(locale))\n\t\t\tWHERE deleted_at IS NULL AND translation_group IS NOT NULL\n\t\t"
 	},
 	{
 		"type": "table",
@@ -178,6 +258,11 @@
 		"type": "table",
 		"name": "ec_posts",
 		"sql": "CREATE TABLE \"ec_posts\" (\"id\" text primary key, \"slug\" text, \"status\" text default 'draft', \"author_id\" text, \"primary_byline_id\" text, \"created_at\" text default (datetime('now')), \"updated_at\" text default (datetime('now')), \"published_at\" text, \"scheduled_at\" text, \"deleted_at\" text, \"version\" integer default 1, \"live_revision_id\" text references \"revisions\" (\"id\"), \"draft_revision_id\" text references \"revisions\" (\"id\"), \"locale\" text default 'en' not null, \"translation_group\" text, \"title\" text default '' not null, \"featured_image\" text, \"content\" json, \"excerpt\" text, constraint \"ec_posts_slug_locale_unique\" unique (\"slug\", \"locale\"))"
+	},
+	{
+		"type": "table",
+		"name": "ec_team",
+		"sql": "CREATE TABLE \"ec_team\" (\"id\" text primary key, \"slug\" text, \"status\" text default 'draft', \"author_id\" text, \"primary_byline_id\" text, \"created_at\" text default (datetime('now')), \"updated_at\" text default (datetime('now')), \"published_at\" text, \"scheduled_at\" text, \"deleted_at\" text, \"version\" integer default 1, \"live_revision_id\" text references \"revisions\" (\"id\"), \"draft_revision_id\" text references \"revisions\" (\"id\"), \"locale\" text default 'en' not null, \"translation_group\" text, \"title\" TEXT NOT NULL DEFAULT '', \"role\" TEXT, \"department\" TEXT, \"photo\" TEXT, \"hover_photo\" TEXT, \"bio\" JSON, \"more_info\" JSON, \"accent_color\" TEXT, \"order\" INTEGER, \"email\" TEXT, \"website\" TEXT, \"linkedin\" TEXT, \"github\" TEXT, \"twitter\" TEXT, \"mastodon\" TEXT, \"instagram\" TEXT, constraint \"ec_team_slug_locale_unique\" unique (\"slug\", \"locale\"))"
 	},
 	{
 		"type": "trigger",
