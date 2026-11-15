@@ -1,6 +1,81 @@
 [
 	{
 		"type": "index",
+		"name": "idx_ec_fonts_author",
+		"sql": "CREATE INDEX \"idx_ec_fonts_author\"\n\t\t\tON \"ec_fonts\" (author_id)\n\t\t"
+	},
+	{
+		"type": "index",
+		"name": "idx_ec_fonts_del_sched",
+		"sql": "CREATE INDEX \"idx_ec_fonts_del_sched\"\n\t\t\tON \"ec_fonts\" (deleted_at, scheduled_at)\n\t\t\tWHERE scheduled_at IS NOT NULL\n\t\t"
+	},
+	{
+		"type": "index",
+		"name": "idx_ec_fonts_del_tg_locale",
+		"sql": "CREATE INDEX \"idx_ec_fonts_del_tg_locale\"\n\t\t\tON \"ec_fonts\" (deleted_at, translation_group, locale)\n\t\t"
+	},
+	{
+		"type": "index",
+		"name": "idx_ec_fonts_deleted_created_id",
+		"sql": "CREATE INDEX \"idx_ec_fonts_deleted_created_id\"\n\t\t\tON \"ec_fonts\" (deleted_at, created_at DESC, id DESC)\n\t\t"
+	},
+	{
+		"type": "index",
+		"name": "idx_ec_fonts_deleted_published_id",
+		"sql": "CREATE INDEX \"idx_ec_fonts_deleted_published_id\"\n\t\t\tON \"ec_fonts\" (deleted_at, published_at DESC, id DESC)\n\t\t"
+	},
+	{
+		"type": "index",
+		"name": "idx_ec_fonts_deleted_status",
+		"sql": "CREATE INDEX \"idx_ec_fonts_deleted_status\"\n\t\t\tON \"ec_fonts\" (deleted_at, status)\n\t\t"
+	},
+	{
+		"type": "index",
+		"name": "idx_ec_fonts_deleted_updated_id",
+		"sql": "CREATE INDEX \"idx_ec_fonts_deleted_updated_id\"\n\t\t\tON \"ec_fonts\" (deleted_at, updated_at DESC, id DESC)\n\t\t"
+	},
+	{
+		"type": "index",
+		"name": "idx_ec_fonts_draft_revision",
+		"sql": "CREATE INDEX \"idx_ec_fonts_draft_revision\"\n\t\t\tON \"ec_fonts\" (draft_revision_id)\n\t\t"
+	},
+	{
+		"type": "index",
+		"name": "idx_ec_fonts_live_revision",
+		"sql": "CREATE INDEX \"idx_ec_fonts_live_revision\"\n\t\t\tON \"ec_fonts\" (live_revision_id)\n\t\t"
+	},
+	{
+		"type": "index",
+		"name": "idx_ec_fonts_loc_crt",
+		"sql": "CREATE INDEX \"idx_ec_fonts_loc_crt\"\n\t\t\tON \"ec_fonts\" (deleted_at, locale, created_at DESC, id DESC)\n\t\t"
+	},
+	{
+		"type": "index",
+		"name": "idx_ec_fonts_loc_upd",
+		"sql": "CREATE INDEX \"idx_ec_fonts_loc_upd\"\n\t\t\tON \"ec_fonts\" (deleted_at, locale, updated_at DESC, id DESC)\n\t\t"
+	},
+	{
+		"type": "index",
+		"name": "idx_ec_fonts_locale",
+		"sql": "CREATE INDEX \"idx_ec_fonts_locale\"\n\t\t\tON \"ec_fonts\" (locale)\n\t\t"
+	},
+	{
+		"type": "index",
+		"name": "idx_ec_fonts_primary_byline",
+		"sql": "CREATE INDEX \"idx_ec_fonts_primary_byline\"\n\t\t\tON \"ec_fonts\" (primary_byline_id)\n\t\t"
+	},
+	{
+		"type": "index",
+		"name": "idx_ec_fonts_slug",
+		"sql": "CREATE INDEX \"idx_ec_fonts_slug\"\n\t\t\tON \"ec_fonts\" (slug)\n\t\t"
+	},
+	{
+		"type": "index",
+		"name": "idx_ec_fonts_tg_locale",
+		"sql": "CREATE INDEX \"idx_ec_fonts_tg_locale\"\n\t\t\tON \"ec_fonts\" (translation_group, locale)\n\t\t"
+	},
+	{
+		"type": "index",
 		"name": "idx_ec_pages_author",
 		"sql": "CREATE INDEX \"idx_ec_pages_author\"\n\t\t\tON \"ec_pages\" (author_id)\n\t\t"
 	},
@@ -226,6 +301,11 @@
 	},
 	{
 		"type": "index",
+		"name": "uidx_ec_fonts_active_tg_locale",
+		"sql": "CREATE UNIQUE INDEX \"uidx_ec_fonts_active_tg_locale\"\n\t\t\tON \"ec_fonts\" (translation_group, lower(locale))\n\t\t\tWHERE deleted_at IS NULL AND translation_group IS NOT NULL\n\t\t"
+	},
+	{
+		"type": "index",
 		"name": "uidx_ec_pages_active_tg_locale",
 		"sql": "CREATE UNIQUE INDEX \"uidx_ec_pages_active_tg_locale\"\n\t\t\tON \"ec_pages\" (translation_group, lower(locale))\n\t\t\tWHERE deleted_at IS NULL AND translation_group IS NOT NULL\n\t\t"
 	},
@@ -248,6 +328,11 @@
 		"type": "table",
 		"name": "_emdash_fts_posts",
 		"sql": "CREATE VIRTUAL TABLE \"_emdash_fts_posts\" USING fts5(\n\t\t\t\tid UNINDEXED, locale UNINDEXED, title, content,\n\t\t\t\ttokenize='porter unicode61'\n\t\t\t)"
+	},
+	{
+		"type": "table",
+		"name": "ec_fonts",
+		"sql": "CREATE TABLE \"ec_fonts\" (\"id\" text primary key, \"slug\" text, \"status\" text default 'draft', \"author_id\" text, \"primary_byline_id\" text, \"created_at\" text default (datetime('now')), \"updated_at\" text default (datetime('now')), \"published_at\" text, \"scheduled_at\" text, \"deleted_at\" text, \"version\" integer default 1, \"live_revision_id\" text references \"revisions\" (\"id\"), \"draft_revision_id\" text references \"revisions\" (\"id\"), \"locale\" text default 'en' not null, \"translation_group\" text, \"title\" TEXT NOT NULL DEFAULT '', \"body_font\" TEXT, \"heading_font\" TEXT, \"weights\" TEXT, \"subsets\" TEXT, \"body_weight\" TEXT, \"heading_weight\" TEXT, \"base_size\" TEXT, \"line_height\" TEXT, \"letter_spacing\" TEXT, \"body_color\" TEXT, \"heading_color\" TEXT, \"heading_transform\" TEXT, \"custom_selectors\" TEXT, constraint \"ec_fonts_slug_locale_unique\" unique (\"slug\", \"locale\"))"
 	},
 	{
 		"type": "table",

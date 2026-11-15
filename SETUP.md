@@ -92,9 +92,26 @@ Limits in the static studio:
 
 ## 12. Optional: a team page
 
-`/team` lists the members of the `team` collection (name, position, department, photo, hover photo, bio, expandable "more info", an accent color, an order number and social links). Each member also gets a page at `/team/<slug>`. Edit members in the studio like any other content. Unpublished members are hidden. The `TeamGrid` component takes `layout` (grid or list), `shape` (round or square), `photoPosition` (top, side or banner) and `filter` (department buttons).
+The `@digitaldefiance/ghdash-team` package (already installed here) gives you a `team` collection, a `TeamGrid` component, `/team` and a page per member. Edit members in the studio like any other content. To add it to another site:
 
-To add the collection to a different site, run `node scripts/add-team.mjs` in its root; it creates the fields and three sample members.
+```sh
+npm install @digitaldefiance/ghdash-team
+npx ghdash-team        # adds the collection and three sample members to content/
+cp -r node_modules/@digitaldefiance/ghdash-team/templates/team src/pages/team
+```
+
+See the [package README](https://github.com/Digital-Defiance/ghdash-plugins/tree/main/packages/team) for the fields and component options.
+
+## 13. Optional: choose fonts
+
+The `@digitaldefiance/ghdash-fonts` package lets you pick Google Fonts, sizes, colors and per-element rules in the studio (the "Fonts" collection). The build downloads the font files into your site, so visitors make no requests to Google.
+
+```sh
+npm install @digitaldefiance/ghdash-fonts
+npx ghdash-fonts init   # adds the "fonts" collection with one entry
+```
+
+Then add `<FontStyles />` before `</head>` in your layout and put `ghdash-fonts build &&` before `astro build` in the `build` script, as this demo does. See the [package README](https://github.com/Digital-Defiance/ghdash-plugins/tree/main/packages/fonts).
 
 ## Keep it current
 

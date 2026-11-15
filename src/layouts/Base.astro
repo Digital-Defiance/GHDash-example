@@ -9,6 +9,7 @@ import {
 import { createPublicPageContext } from "emdash/page";
 import LiveSearch from "emdash/ui/search";
 import { Font } from "astro:assets";
+import FontStyles from "@digitaldefiance/ghdash-fonts/FontStyles.astro";
 import { getSiteLocale } from "../utils/locale";
 import { resolveBlogSiteIdentity } from "../utils/site-identity";
 import "../styles/tokens.css";
@@ -135,6 +136,7 @@ const year = new Date().getFullYear();
 				}
 			})();
 		</script>
+		<FontStyles />
 	</head>
 	<body>
 		<EmDashBodyStart page={pageCtx} />

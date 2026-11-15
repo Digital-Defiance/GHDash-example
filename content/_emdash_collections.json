@@ -79,5 +79,32 @@
 		"title_field": null,
 		"updated_at": "2026-11-15 00:29:40",
 		"url_pattern": null
+	},
+	{
+		"admin_config": null,
+		"comments_auto_approve_users": 1,
+		"comments_closed_after_days": 90,
+		"comments_enabled": 0,
+		"comments_moderation": "first_time",
+		"created_at": "2026-11-15 01:02:33",
+		"date_field": null,
+		"description": null,
+		"edit_locking": 1,
+		"has_seo": 0,
+		"hidden": 0,
+		"icon": null,
+		"id": "01M7EBMDX44T3PVKVQERB2BD0K",
+		"label": "Fonts",
+		"label_singular": "Font settings",
+		"nav_group": null,
+		"routable": 1,
+		"search_config": null,
+		"slug": "fonts",
+		"sort_order": null,
+		"source": "manual",
+		"supports": "[\"drafts\",\"revisions\"]",
+		"title_field": null,
+		"updated_at": "2026-11-15 01:02:33",
+		"url_pattern": null
 	}
 ]
