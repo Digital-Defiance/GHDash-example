@@ -111,7 +111,7 @@ npm install @digitaldefiance/ghdash-fonts
 npx ghdash-fonts init   # adds the "fonts" collection with one entry
 ```
 
-Then add `<FontStyles />` before `</head>` in your layout and put `ghdash-fonts build &&` before `astro build` in the `build` script, as this demo does. See the [package README](https://github.com/Digital-Defiance/ghdash-plugins/tree/main/packages/fonts).
+Then add `<FontStyles />` before `</head>` in your layout and put `ghdash-fonts build &&` before `astro build` in the `build` script, as this demo does. It also supports Adobe Fonts (loaded from Adobe) and your own font files, which you put in a `custom-fonts/` folder. See the [package README](https://github.com/Digital-Defiance/ghdash-plugins/tree/main/packages/fonts).
 
 ## Keep it current
 

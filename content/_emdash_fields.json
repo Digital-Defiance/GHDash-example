@@ -682,5 +682,43 @@
 		"unique": 0,
 		"validation": null,
 		"widget": null
+	},
+	{
+		"collection_id": "01M7EBMDX44T3PVKVQERB2BD0K",
+		"column_type": "TEXT",
+		"created_at": "2026-11-15 01:27:43",
+		"default_value": null,
+		"id": "01M7ED2GD4FCVJ9DM452Q8F1WT",
+		"indexed": 0,
+		"label": "Adobe Fonts web project ID (optional; loads from Adobe, not your site)",
+		"options": null,
+		"required": 0,
+		"searchable": 0,
+		"slug": "adobe_kit",
+		"sort_order": 14,
+		"translatable": 1,
+		"type": "string",
+		"unique": 0,
+		"validation": null,
+		"widget": null
+	},
+	{
+		"collection_id": "01M7EBMDX44T3PVKVQERB2BD0K",
+		"column_type": "TEXT",
+		"created_at": "2026-11-15 01:27:43",
+		"default_value": null,
+		"id": "01M7ED2GDMH2M0AHNQX02ESG69",
+		"indexed": 0,
+		"label": "Fonts that come from Adobe, comma separated (e.g. proxima-nova)",
+		"options": null,
+		"required": 0,
+		"searchable": 0,
+		"slug": "adobe_families",
+		"sort_order": 15,
+		"translatable": 1,
+		"type": "string",
+		"unique": 0,
+		"validation": null,
+		"widget": null
 	}
 ]
