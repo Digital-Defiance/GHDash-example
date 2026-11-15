@@ -80,6 +80,16 @@ Without this, editors paste a fine-grained token. With it, the studio also shows
 
 GitHub App tokens last eight hours, then the studio asks the editor to sign in again. Pending edits stay in the browser meanwhile.
 
+## 11. Optional: import from WordPress
+
+Open the studio at `/studio/import/wordpress`, choose "Upload WordPress export file", and pick the `.xml` export from WordPress (Tools, Export). The studio analyzes the file, creates any missing fields, and imports posts and pages into the pending changes tray. Nothing is written to GitHub until you commit the tray, so you can review the new entries and discard any you don't want.
+
+Limits in the static studio:
+
+- Use the file upload. The "migration key" and "check site by URL" options need a server and a WordPress plugin, which a static site doesn't have.
+- Images are not downloaded from the old site. Browsers block those requests (CORS), so image links keep pointing at the old site until you upload copies through the media library.
+- Authors can't be mapped to users, because there is no user list on a static site. Posts are imported unassigned.
+
 ## Keep it current
 
 The admin and browser API come from release assets named in `package.json`. To upgrade, change those URLs to a newer `pages-v*` release and run `npm install`.
