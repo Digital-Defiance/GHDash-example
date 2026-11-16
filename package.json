@@ -20,7 +20,7 @@
     "@astrojs/react": "7.0.0",
     "@digitaldefiance/gitdash-fonts": "^0.3.0",
     "@digitaldefiance/gitdash-team": "^0.2.0",
-    "@emdash-cms/admin": "https://github.com/Digital-Defiance/ghdash/releases/download/pages-v0.6.0/emdash-cms-admin-1.5.0.tgz",
+    "@emdash-cms/admin": "https://github.com/Digital-Defiance/gitdash/releases/download/pages-v0.6.0/emdash-cms-admin-1.5.0.tgz",
     "@emdash-cms/plugin-color": "^0.2.1",
     "@emdash-cms/plugin-embeds": "^0.1.59",
     "@emdash-cms/plugin-field-kit": "^0.1.3",
@@ -31,7 +31,7 @@
     "react-dom": "19.2.4"
   },
   "devDependencies": {
-    "@digitaldefiance/gitdash-pages": "^0.15.0",
+    "@digitaldefiance/gitdash-pages": "^0.15.1",
     "@emdash-cms/plugin-webhook-notifier": "^0.2.3",
     "@playwright/test": "^1.63.0",
     "lightningcss": "1.33.0",
@@ -41,6 +41,6 @@
     "node": ">=22.16"
   },
   "overrides": {
-    "@emdash-cms/admin": "https://github.com/Digital-Defiance/ghdash/releases/download/pages-v0.6.0/emdash-cms-admin-1.5.0.tgz"
+    "@emdash-cms/admin": "https://github.com/Digital-Defiance/gitdash/releases/download/pages-v0.6.0/emdash-cms-admin-1.5.0.tgz"
   }
 }
