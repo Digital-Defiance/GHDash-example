@@ -117,6 +117,16 @@ Then add `<FontStyles />` before `</head>` in your layout and put `gitdash-fonts
 
 GitHub Pages is the default, but the same site builds on other hosts. The address and base path come from the host (see `astro.config.mjs`), and the studio commits to wherever the repository lives, GitHub or GitLab. Scheduled posts, plugin after-hooks and cron need a commit back to the repository, so they keep running in the repository's own CI (GitHub Actions or GitLab CI).
 
+Which one to pick: all four serve the same site, and the studio and comments follow wherever the repository lives, not where the site is served.
+
+| Host | Pick it when | Where scheduled posts, hooks and cron run | Comments |
+| --- | --- | --- | --- |
+| GitHub Pages | Your repository is on GitHub and you want the simplest setup (steps 1 to 3 above). | GitHub Actions | giscus |
+| Netlify or Cloudflare Pages | You want real redirects, branch previews or your own build settings. The repository can be on GitHub or GitLab. | The repository's own CI | giscus for a GitHub repository, GitLab issues for a GitLab one |
+| GitLab Pages | Your repository is on GitLab. | GitLab CI, from an hourly pipeline schedule | GitLab issues |
+
+Steps 1 to 3 above are written for GitHub. On GitLab, import or push the repository instead of using the template button, and follow the GitLab section below.
+
 ### Hosting on Netlify
 
 1. Netlify → **Add new site → Import an existing project**, pick this repository (on GitHub or GitLab). `netlify.toml` already sets the build command (`npm run build`), the output folder (`dist/client`) and Node 22, so leave the form as it is.
@@ -136,7 +146,7 @@ GitHub Pages is the default, but the same site builds on other hosts. The addres
 1. Push this repository to a GitLab project (or import it). `.gitlab-ci.yml` builds the site on every push to the default branch and publishes it with GitLab Pages. The site appears at the address under **Deploy → Pages**: `https://<namespace>.gitlab.io/<project>/`, or a unique domain at the root. Either works without editing anything.
 2. Editing: open `/studio/` and paste a GitLab **personal access token** with the **api** scope (User settings → Access tokens; the studio's "What token do I need?" link opens the form filled in). Your account must be allowed to push to the default branch, which by default means Maintainer. A project access token (Settings → Access tokens, role Maintainer, scope api) works too. The token stays in the browser tab and is only sent to your GitLab's API.
 3. Optional, scheduled posts, plugin hooks and cron: create a project access token with role **Maintainer** and scope **write_repository**, add it as a masked CI/CD variable `GITDASH_PUSH_TOKEN`, and add an hourly pipeline schedule (Build → Pipeline schedules) on the default branch. Webhook secrets such as `WEBHOOK_URL` are CI/CD variables too.
-4. Comments: giscus needs a GitHub repository with Discussions. A GitLab site can still use one (point `giscus.json` at any public GitHub repository), or leave comments off. Contact form: set `"issueProject": "group/project"` in `contact.json` (and `"issueHost"` for a self-managed GitLab) to take messages as public GitLab issues.
+4. Comments: they live in GitLab issues. Nothing to configure: the build reads every issue titled `Comments: <post id>`, and a post with no issue yet shows a "Comment on GitLab" link that opens GitLab's new-issue form with the title filled in. Commenters need a GitLab account, and new comments show after the next build (the hourly schedule from step 3, or any push). For a private project, add a CI/CD variable `GITLAB_TOKEN` with the `read_api` scope. To use giscus or turn comments off instead, put `{ "provider": "giscus" }` or `{ "provider": "off" }` in `comments.json`. Contact form: set `"issueProject": "group/project"` in `contact.json` (and `"issueHost"` for a self-managed GitLab) to take messages as public GitLab issues.
 5. Optional, "Sign in with GitLab" instead of pasting a token: User settings → Applications → **Add new application**. Redirect URI: the site's `/studio/` address. Untick **Confidential**, tick the **api** scope. Copy `gitlab-oauth.example.json` to `gitlab-oauth.json` and put the Application ID in `clientId`. No Worker or secret is needed. Sign-ins last two hours.
 
 ## Keep it current
