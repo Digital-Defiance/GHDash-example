@@ -39,6 +39,16 @@ async function asGitLabSite(page: Page, fake: Fake) {
 			const items = fake.existing.filter((p) => p.startsWith(`${dir}/`)).map((p) => ({ type: "blob", path: p, id: p }));
 			return items.length ? json(items, 200, { "x-next-page": "" }) : json({ message: "404 Tree Not Found" }, 404);
 		}
+		if (path.startsWith(`${proj}/repository/files/`) && req.method() === "HEAD") {
+			const file = decodeURIComponent(path.slice(`${proj}/repository/files/`.length));
+			return fake.existing.includes(file)
+				? route.fulfill({
+						status: 200,
+						// As gitlab.com does: the header is readable from the page only because GitLab exposes it to CORS.
+						headers: { "access-control-allow-origin": "*", "access-control-expose-headers": "X-Gitlab-Last-Commit-Id", "x-gitlab-last-commit-id": "last-of-" + file },
+					})
+				: route.fulfill({ status: 404 });
+		}
 		if (path === `${proj}/repository/commits` && req.method() === "POST") {
 			const body = req.postDataJSON();
 			fake.commits.push({ branch: body.branch, message: body.commit_message, actions: body.actions });
@@ -83,6 +93,7 @@ test("on GitLab the studio asks for a GitLab token and commits through the GitLa
 	expect(fake.commits[0]!.actions).toHaveLength(1);
 	expect(action!.file_path).toMatch(/^content\/ec_posts\/.+\.json$/);
 	expect(action!.action).toBe("update");
+	expect((action as Action & { last_commit_id?: string }).last_commit_id).toBe(`last-of-${action!.file_path}`);
 	expect(JSON.parse(action!.content!).title).toBe("Edited on GitLab");
 	expect(parent).not.toBe("");
 	await expect(page.getByTestId("tray-count")).toHaveText("0");
@@ -96,4 +107,40 @@ test("a GitLab token that can't push to the branch is refused at sign-in", async
 	await page.getByLabel(/GitLab token/).fill("glpat-fake");
 	await page.getByRole("button", { name: "Sign in" }).click();
 	await expect(page.getByRole("alert")).toContainText("can read the repository but not push");
+});
+
+test("Sign in with GitLab goes to GitLab and trades the code at GitLab's own token endpoint", async ({ page }) => {
+	await asGitLabSite(page, { head: "", canPush: true, commits: [], existing: [] });
+	await page.addInitScript(() => {
+		(globalThis as any).__STUDIO_OAUTH__ = { clientId: "gl-app" };
+	});
+	let authorize: URL | undefined;
+	await page.route("https://gitlab.com/oauth/authorize**", (route) => {
+		authorize = new URL(route.request().url());
+		return route.fulfill({ status: 200, contentType: "text/html", body: "<p>GitLab</p>" });
+	});
+	let traded: URLSearchParams | undefined;
+	await page.route("https://gitlab.com/oauth/token", (route) => {
+		const headers = { "access-control-allow-origin": "*", "access-control-allow-headers": "content-type" };
+		if (route.request().method() === "OPTIONS") return route.fulfill({ status: 204, headers });
+		traded = new URLSearchParams(route.request().postData() ?? "");
+		return route.fulfill({ status: 200, headers, contentType: "application/json", body: JSON.stringify({ access_token: "glpat-fake", token_type: "Bearer" }) });
+	});
+	await page.goto("studio/");
+	await expect(page.getByTestId("tray-button")).toBeVisible({ timeout: 30_000 });
+	await page.getByTestId("tray-button").click();
+	await expect(page.getByTestId("tray-github-signin")).toHaveText("Sign in with GitLab");
+	await page.getByTestId("tray-github-signin").click();
+	await expect.poll(() => authorize?.searchParams.get("client_id")).toBe("gl-app");
+	expect(authorize!.searchParams.get("scope")).toBe("api");
+	expect(authorize!.searchParams.get("code_challenge_method")).toBe("S256");
+	const redirect = authorize!.searchParams.get("redirect_uri")!;
+	await page.goto(`${redirect}?code=c123&state=${authorize!.searchParams.get("state")}`);
+	await expect(page.getByTestId("tray-button")).toBeVisible({ timeout: 30_000 });
+	await page.getByTestId("tray-button").click();
+	await expect(page.getByLabel("Commit message")).toBeVisible();
+	expect(traded?.get("code")).toBe("c123");
+	expect(traded?.get("client_id")).toBe("gl-app");
+	expect(traded?.get("grant_type")).toBe("authorization_code");
+	expect(traded?.get("code_verifier")).toBeTruthy();
 });

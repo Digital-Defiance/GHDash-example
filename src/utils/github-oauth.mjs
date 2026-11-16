@@ -19,3 +19,16 @@ export function getOAuth(file = "github-oauth.json") {
 	if (url.protocol !== "https:" || /(^|\.)example\.(com|org|net)$/i.test(url.hostname)) return null;
 	return { clientId: config.clientId.trim(), exchangeUrl: url.href };
 }
+
+/** Reads gitlab-oauth.json from the site root: the client ID of a non-confidential GitLab OAuth application (scope api). No exchange service is needed. */
+export function getGitLabOAuth(file = "gitlab-oauth.json") {
+	if (!existsSync(file)) return null;
+	let config;
+	try {
+		config = JSON.parse(readFileSync(file, "utf8"));
+	} catch {
+		return null;
+	}
+	if (typeof config.clientId !== "string" || !config.clientId.trim() || /^x+$/i.test(config.clientId.trim())) return null;
+	return { clientId: config.clientId.trim() };
+}

@@ -137,7 +137,7 @@ GitHub Pages is the default, but the same site builds on other hosts. The addres
 2. Editing: open `/studio/` and paste a GitLab **personal access token** with the **api** scope (User settings → Access tokens; the studio's "What token do I need?" link opens the form filled in). Your account must be allowed to push to the default branch, which by default means Maintainer. A project access token (Settings → Access tokens, role Maintainer, scope api) works too. The token stays in the browser tab and is only sent to your GitLab's API.
 3. Optional, scheduled posts, plugin hooks and cron: create a project access token with role **Maintainer** and scope **write_repository**, add it as a masked CI/CD variable `GHDASH_PUSH_TOKEN`, and add an hourly pipeline schedule (Build → Pipeline schedules) on the default branch. Webhook secrets such as `WEBHOOK_URL` are CI/CD variables too.
 4. Comments: giscus needs a GitHub repository with Discussions. A GitLab site can still use one (point `giscus.json` at any public GitHub repository), or leave comments off. Contact form: set `"issueProject": "group/project"` in `contact.json` (and `"issueHost"` for a self-managed GitLab) to take messages as public GitLab issues.
-5. "Sign in with GitHub" doesn't apply on GitLab; editors paste a token.
+5. Optional, "Sign in with GitLab" instead of pasting a token: User settings → Applications → **Add new application**. Redirect URI: the site's `/studio/` address. Untick **Confidential**, tick the **api** scope. Copy `gitlab-oauth.example.json` to `gitlab-oauth.json` and put the Application ID in `clientId`. No Worker or secret is needed. Sign-ins last two hours.
 
 ## Keep it current
 
