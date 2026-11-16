@@ -2,7 +2,7 @@
 
 An [EmDash](https://github.com/Digital-Defiance/gitdash) blog that runs entirely on GitHub Pages. There is no server and no database service: the content lives as JSON in `content/`, and a GitHub Action builds it into a static site on every push.
 
-Design and progress: [SPEC.md and TODO.md in the main repo](https://github.com/Digital-Defiance/gitdash/tree/main/ghpages-port).
+Design and progress: [SPEC.md and TODO.md in the main repo](https://github.com/Digital-Defiance/gitdash/tree/main/gitpages-port).
 
 Want your own? See [SETUP.md](SETUP.md): use this repository as a template, turn on Pages, and paste a token.
 
