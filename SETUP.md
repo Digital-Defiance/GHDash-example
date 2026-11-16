@@ -1,6 +1,6 @@
 # Set up your own site from this template
 
-This repository is a complete EmDash site that builds and runs on GitHub Pages, and also on Netlify, Cloudflare Pages or GitLab Pages (see "Other hosts" below). Nothing in it is tied to one repository name, so you can start your own copy in a few minutes.
+This repository is a complete EmDash site that builds and runs on GitHub Pages, and also on Netlify, Cloudflare or GitLab Pages (see "Other hosts" below). Nothing in it is tied to one repository name, so you can start your own copy in a few minutes.
 
 ## 1. Create your repository
 
@@ -134,12 +134,18 @@ Steps 1 to 3 above are written for GitHub. On GitLab, import or push the reposit
 3. If the repository is on GitHub, add a repository variable (Settings → Secrets and variables → Actions → Variables) `GITDASH_HOST` = `netlify`. The workflow then stops deploying to GitHub Pages but still publishes scheduled posts and runs hooks and cron; its commits make Netlify rebuild. On GitLab, set the same CI/CD variable.
 4. Redirects from the studio become Netlify `_redirects` rules, so they are real 301s.
 
-### Hosting on Cloudflare Pages
+### Hosting on Cloudflare
 
-1. Run `npx gitdash-pages add-host cloudflare` and set `name` in the new `wrangler.toml` to your Pages project's name. Commit it.
-2. Cloudflare dashboard → **Workers & Pages → Create → Pages → Connect to Git**, pick this repository. Build command `npm run build`, build output directory `dist/client`. Environment variables: `NODE_VERSION` = `22`, `NODE_OPTIONS` = `--max-old-space-size=4096`, and `SITE_URL` = your production address (for example `https://my-site.pages.dev`), because Cloudflare only tells the build each deployment's own address.
-3. Cloudflare doesn't tell the build which repository it cloned. If the studio says it doesn't know where to commit, add `STUDIO_REPO` = `owner/repo` (and `STUDIO_PROVIDER` = `gitlab` for a GitLab project).
-4. As for Netlify, set `GITDASH_HOST` = `cloudflare-pages` on the repository so its CI keeps doing scheduled posts, hooks and cron without deploying.
+Cloudflare now creates new Git-connected sites as Workers that serve static files (the older "Pages" form is being retired; see the end of this section if you still use it).
+
+1. The repository needs a `wrangler.jsonc` at its root (this one has it; for another site run `npx gitdash-pages add-host cloudflare` and commit the file). It names the Worker and says the site is the built `dist/client` folder. Set `name` to the Worker name you want.
+2. Cloudflare dashboard → **Workers & Pages → Create application → Import a repository** (or **Connect to Git**), pick this repository and the production branch (`main`).
+3. Build settings: **Build command** `npm run build`, **Deploy command** `npx wrangler deploy` (the default). Leave the preview command alone.
+4. **Build variables** (Advanced settings, or Settings → Build → Build variables and secrets; they apply to the build only): `NODE_VERSION` = `22`, `NODE_OPTIONS` = `--max-old-space-size=4096`, `STUDIO_REPO` = `owner/repo` (and `STUDIO_PROVIDER` = `gitlab` for a GitLab project). Cloudflare doesn't tell the build which repository it cloned, so without `STUDIO_REPO` the studio can't tell where to save.
+5. Deploy. The site is at `https://<name>.<your-subdomain>.workers.dev`. That address isn't known to the build, so add one more build variable, `SITE_URL` = that address (or your custom domain), and deploy again so links and the sitemap use it.
+6. As for Netlify, set `GITDASH_HOST` = `cloudflare-pages` on the repository (GitHub: Settings → Secrets and variables → Actions → Variables) so its own CI keeps doing scheduled posts, hooks and cron without deploying to GitHub Pages.
+
+If you still use the legacy Pages form (Workers & Pages → Create → Pages → Connect to Git): build command `npm run build`, build output directory `dist/client`, the same variables plus `SITE_URL` = `https://<project>.pages.dev`, and no `wrangler.jsonc` (Pages reads that file as its own configuration; `npx gitdash-pages add-host cloudflare-pages` writes the Pages one).
 
 ### Hosting on GitLab Pages
 
