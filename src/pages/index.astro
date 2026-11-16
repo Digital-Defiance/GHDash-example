@@ -1,21 +1,15 @@
 ---
-import {
-	getEmDashCollection,
-	getTermsForEntries,
-	getSiteSettings,
-} from "emdash";
+import { getEmDashCollection, getSiteSettings } from "emdash";
 import Base from "../layouts/Base.astro";
 import PostCard from "../components/PostCard.astro";
 import { resolveBlogSiteIdentity } from "../utils/site-identity";
 
-// Limit to what we render (1 featured + 6 grid). The DB does the slicing
-// instead of fetching every post and discarding the tail in JS.
-const POSTS_PER_PAGE = 7;
-
+// The GitDash product page. The site itself is a GitDash site: the posts at
+// the bottom are the demo content, editable in the studio.
 const [{ entries: posts, cacheHint }, settings] = await Promise.all([
 	getEmDashCollection("posts", {
 		orderBy: { published_at: "desc" },
-		limit: POSTS_PER_PAGE + 1, // +1 to detect "view all" need
+		limit: 3,
 	}),
 	getSiteSettings(),
 ]);
@@ -23,172 +17,549 @@ const { siteTitle, siteTagline } = resolveBlogSiteIdentity(settings);
 
 if (Astro.cache?.enabled) Astro.cache.set(cacheHint);
 
-// Trim the lookahead post used to detect overflow
-const visiblePosts = posts.slice(0, POSTS_PER_PAGE);
-const hasMorePosts = posts.length > POSTS_PER_PAGE;
+const REPO = "https://github.com/Digital-Defiance/gitdash";
+const TEMPLATE = "https://github.com/Digital-Defiance/GitDash-example";
+const SETUP = `${TEMPLATE}/blob/main/SETUP.md`;
+const NPM = "https://www.npmjs.com/package/@digitaldefiance/gitdash-pages";
 
-// Find the first post with a featured image for the hero
-const featuredPost = visiblePosts.find((p) => p.data.featured_image);
-const featuredIndex = featuredPost ? visiblePosts.indexOf(featuredPost) : -1;
-
-// Get remaining posts (exclude featured if found, limit to 6 for grid)
-const gridPosts = visiblePosts
-	.filter((_, i) => i !== featuredIndex)
-	.slice(0, 6);
-
-// Single batched query for tags across the featured post + grid posts.
-// Avoids the N+1 pattern of calling getEntryTerms() per entry.
-// Bylines are already hydrated on entry.data.bylines by getEmDashCollection.
-const tagEntryIds = [
-	...(featuredPost ? [featuredPost.data.id] : []),
-	...gridPosts.map((p) => p.data.id),
+const features = [
+	{
+		title: "Content is just files",
+		text: "Posts, pages, menus, settings and the schema are JSON in content/, one file per row. Diff them, review them in a pull request, and roll back with git.",
+	},
+	{
+		title: "EmDash's own admin, in the browser",
+		text: "Open /studio/ and you get the real EmDash editor, running on SQLite compiled to WebAssembly. No server behind it.",
+	},
+	{
+		title: "One commit per save",
+		text: "Edits collect in a pending-changes tray that survives a reload. Commit writes them all as one atomic commit, and merges if someone pushed meanwhile.",
+	},
+	{
+		title: "Free static hosting",
+		text: "A CI job turns the JSON into a fast static site. No database bill, nothing to patch, nothing to keep running.",
+	},
+	{
+		title: "Media, search and SEO built in",
+		text: "Image uploads with responsive sizes, Pagefind search, a sitemap, robots.txt, redirects and an RSS feed.",
+	},
+	{
+		title: "Scheduled posts, hooks and cron",
+		text: "Schedule a post and an hourly job publishes it. Plugin after-hooks, webhooks and cron jobs run in CI.",
+	},
+	{
+		title: "Comments and contact forms",
+		text: "giscus or GitLab comments on posts, and a contact form that posts to a form service, your own Worker, or issues.",
+	},
+	{
+		title: "Bring your old site",
+		text: "Import a Jekyll site or a folder of Markdown, front matter and images included.",
+	},
 ];
-const tagsByEntry = await getTermsForEntries("posts", tagEntryIds, "tag");
 
-const featuredTags = featuredPost
-	? (tagsByEntry.get(featuredPost.data.id) ?? []).map((t) => ({
-			slug: t.slug,
-			label: t.label,
-		}))
-	: [];
-
-const gridPostsWithTags = gridPosts.map((post) => ({
-	post,
-	tags: (tagsByEntry.get(post.data.id) ?? []).map((t) => ({
-		slug: t.slug,
-		label: t.label,
-	})),
-}));
+const hosts = [
+	{
+		name: "GitHub Pages",
+		text: "The original target. The included workflow builds on every push and deploys with Actions.",
+	},
+	{
+		name: "GitLab Pages",
+		text: "The same build in GitLab CI. The studio commits through the GitLab API, with GitLab sign-in and comments.",
+	},
+	{
+		name: "Netlify",
+		text: "Connect the repository and Netlify builds it with the included netlify.toml.",
+	},
+	{
+		name: "Cloudflare Pages",
+		text: "Point Cloudflare Pages at the repository and it serves the same static build at the edge.",
+	},
+];
 ---
 
 <Base title={siteTitle} description={siteTagline}>
-	<header class="band intro">
-		<div class="frame home-intro">
-			<div>
-				<p class="eyebrow">Blog</p>
-				<h1 class="intro__title">{siteTitle}</h1>
-				{siteTagline && <p class="intro__subtitle">{siteTagline}</p>}
+	<header class="hero">
+		<div class="frame hero__inner">
+			<div class="hero__copy">
+				<p class="hero__eyebrow">Open source · MIT · built on EmDash</p>
+				<h1 class="hero__title">A CMS that lives in your Git repository.</h1>
+				<p class="hero__lede">
+					GitDash runs the EmDash CMS with no server and no database. Your
+					content is JSON in a repo, CI builds a static site, and you edit in
+					the browser with an admin that commits straight back to Git.
+				</p>
+				<p class="hero__actions">
+					<a class="hero__btn hero__btn--gold" href="#get-started">Get started</a>
+					<a class="hero__btn" href="/studio/">Try the studio</a>
+					<a class="hero__btn" href={REPO}>View on GitHub</a>
+				</p>
 			</div>
-			<a
-				href="/rss.xml"
-				type="application/rss+xml"
-				class="btn btn--ghost btn--sm home-intro__rss"
-			>
-				<svg
-					viewBox="0 0 24 24"
-					fill="none"
-					stroke="currentColor"
-					stroke-width="1.75"
-					stroke-linecap="round"
-					stroke-linejoin="round"
-					aria-hidden="true"
-				>
-					<path d="M4 11a9 9 0 0 1 9 9"></path>
-					<path d="M4 4a16 16 0 0 1 16 16"></path>
-					<circle cx="5" cy="19" r="1"></circle>
-				</svg>
-				RSS feed
-			</a>
+			<figure class="flow" aria-label="How a GitDash site is built">
+				<div class="flow__step">
+					<span class="flow__label">You edit</span>
+					<code>/studio/</code>
+				</div>
+				<div class="flow__arrow" aria-hidden="true">↓ one commit</div>
+				<div class="flow__step">
+					<span class="flow__label">Your repo</span>
+					<code>content/ec_posts/01M7….json</code>
+				</div>
+				<div class="flow__arrow" aria-hidden="true">↓ CI build</div>
+				<div class="flow__step flow__step--gold">
+					<span class="flow__label">Your site</span>
+					<code>static HTML, search, sitemap, RSS</code>
+				</div>
+			</figure>
 		</div>
 	</header>
 
-	{
-		posts.length === 0 ? (
-			<section class="band section">
-				<div class="frame">
-					<div class="empty-state">
-						<h2 class="empty-state__title">No posts yet</h2>
-						<p class="empty-state__text">
-							Create your first post in the admin panel.
-						</p>
-						<div class="empty-state__actions">
-							<a href="/_emdash/admin/content/posts/new" class="btn">
-								Create a post
-							</a>
+	<section id="features" class="band section" aria-labelledby="features-title">
+		<div class="frame">
+			<p class="eyebrow">Features</p>
+			<h2 id="features-title" class="section-head__title">
+				Everything EmDash does for editors, nothing to run
+			</h2>
+			<div class="pillars">
+				{
+					features.map((f) => (
+						<div class="pillar">
+							<h3>{f.title}</h3>
+							<p>{f.text}</p>
 						</div>
+					))
+				}
+			</div>
+		</div>
+	</section>
+
+	<section id="hosting" class="band section section--alt" aria-labelledby="hosting-title">
+		<div class="frame">
+			<p class="eyebrow">Hosting</p>
+			<h2 id="hosting-title" class="section-head__title">Host it where you already are</h2>
+			<p class="section-lede">
+				The build is the same everywhere. Pick a host, and the base path and
+				site address are worked out for you.
+			</p>
+			<div class="hosts">
+				{
+					hosts.map((h) => (
+						<div class="host">
+							<h3>{h.name}</h3>
+							<p>{h.text}</p>
+						</div>
+					))
+				}
+			</div>
+		</div>
+	</section>
+
+	<section id="get-started" class="band section" aria-labelledby="start-title">
+		<div class="frame">
+			<p class="eyebrow">Get started</p>
+			<h2 id="start-title" class="section-head__title">Your own site in three steps</h2>
+			<ol class="steps">
+				<li>
+					<h3>Copy the template</h3>
+					<p>
+						Open <a href={TEMPLATE}>GitDash-example</a> and choose{" "}
+						<strong>Use this template</strong>, or fork it.
+					</p>
+				</li>
+				<li>
+					<h3>Turn on Pages</h3>
+					<p>
+						In the new repository: Settings, Pages, Source:{" "}
+						<strong>GitHub Actions</strong>. The first build publishes your site.
+					</p>
+				</li>
+				<li>
+					<h3>Edit in the studio</h3>
+					<p>
+						Open <code>/studio/</code> on your site and sign in with a
+						fine-grained token (Contents: read and write, that repository
+						only). Edit, then <strong>Commit</strong>.
+					</p>
+				</li>
+			</ol>
+			<div class="terminal" aria-label="Build it locally">
+				<p class="terminal__title">Or build it locally</p>
+				<pre><code>npm install
+npm run build      # content/*.json → SQLite → dist/client
+npm run preview</code></pre>
+			</div>
+			<p class="section-more">
+				<a class="arrow-link" href={SETUP}>
+					Read the full setup guide
+					<svg
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="1.75"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						aria-hidden="true"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg
+					>
+				</a>
+				<span class="section-more__sep">·</span>
+				<a href={NPM}><code>@digitaldefiance/gitdash-pages</code> on npm</a>
+			</p>
+		</div>
+	</section>
+
+	{
+		posts.length > 0 && (
+			<section class="band section section--alt" aria-labelledby="demo-title">
+				<div class="frame">
+					<div class="section-head">
+						<div>
+							<p class="eyebrow">Live demo</p>
+							<h2 id="demo-title" class="section-head__title">
+								This site is a GitDash site
+							</h2>
+							<p class="section-lede">
+								These posts are sample content. Open the studio, change one, and
+								see the commit it makes.
+							</p>
+						</div>
+						<a href="/posts" class="arrow-link">
+							All demo posts
+							<svg
+								viewBox="0 0 24 24"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="1.75"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								aria-hidden="true"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg
+							>
+						</a>
+					</div>
+					<div class="post-grid">
+						{posts.map((post) => (
+							<PostCard post={post} tags={[]} variant="card" headingLevel={3} />
+						))}
 					</div>
 				</div>
 			</section>
-		) : (
-			<>
-				{featuredPost && (
-					<section class="band section">
-						<div class="frame">
-							<PostCard
-								post={featuredPost}
-								tags={featuredTags}
-								variant="feature"
-								headingLevel={2}
-								priority
-							/>
-						</div>
-					</section>
-				)}
-
-				{gridPostsWithTags.length > 0 && (
-					<section class="band section" aria-labelledby="latest-posts">
-						<div class="frame">
-							<div class="section-head">
-								<h2 id="latest-posts" class="section-head__title">
-									Latest posts
-								</h2>
-								{hasMorePosts && (
-									<a href="/posts" class="arrow-link">
-										View all<span class="sr-only"> posts</span>
-										<svg
-											viewBox="0 0 24 24"
-											fill="none"
-											stroke="currentColor"
-											stroke-width="1.75"
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											aria-hidden="true"
-										>
-											<path d="M5 12h14" />
-											<path d="m12 5 7 7-7 7" />
-										</svg>
-									</a>
-								)}
-							</div>
-							<div class="post-grid">
-								{gridPostsWithTags.map(({ post, tags }) => (
-									<PostCard
-										post={post}
-										tags={tags}
-										variant="card"
-										headingLevel={3}
-									/>
-								))}
-							</div>
-						</div>
-					</section>
-				)}
-			</>
 		)
 	}
+
+	<section class="cta" aria-labelledby="cta-title">
+		<div class="frame cta__inner">
+			<div>
+				<h2 id="cta-title" class="cta__title">Built in the open by Digital Defiance</h2>
+				<p>
+					GitDash is made by an open source engineering guild. Issues, ideas and
+					pull requests are welcome.
+				</p>
+			</div>
+			<p class="hero__actions">
+				<a class="hero__btn hero__btn--gold" href={REPO}>Star on GitHub</a>
+				<a class="hero__btn" href="https://digitaldefiance.org">Digital Defiance</a>
+			</p>
+		</div>
+	</section>
 </Base>
 
 <style>
-	.home-intro {
-		display: grid;
-		grid-template-columns: minmax(0, 1fr) auto;
-		align-items: end;
-		gap: var(--spacing-6) var(--spacing-8);
+	.hero {
+		background: var(--dd-navy-dark, #0e1838);
+		color: #ffffff;
+		border-bottom: 3px solid var(--dd-gold, #cdb77d);
 	}
 
-	/* Lifts the pill from the line box's bottom onto the last line's baseline */
-	.home-intro__rss {
+	.hero__inner {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) minmax(0, 26rem);
+		align-items: center;
+		gap: var(--spacing-10);
+		padding-block: clamp(3rem, 7vw, 5.5rem);
+	}
+
+	@media (max-width: 860px) {
+		.hero__inner {
+			grid-template-columns: minmax(0, 1fr);
+		}
+	}
+
+	.hero__copy {
+		max-width: 44rem;
+	}
+
+	.hero__eyebrow {
+		font-family: var(--font-mono, monospace);
+		font-size: var(--font-size-label);
+		letter-spacing: var(--tracking-wider);
+		text-transform: uppercase;
+		color: var(--dd-gold, #cdb77d);
+		margin-block-end: var(--spacing-4);
+	}
+
+	.hero__title {
+		font-size: clamp(2.1rem, 1.2rem + 3.2vw, 3.6rem);
+		line-height: 1.1;
+		color: #ffffff;
+	}
+
+	.hero__lede {
+		margin-block-start: var(--spacing-5);
+		font-size: var(--font-size-xl);
+		line-height: 1.55;
+		color: rgb(255 255 255 / 0.82);
+	}
+
+	.hero__actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--spacing-3);
+		margin-block-start: var(--spacing-8);
+	}
+
+	.hero__btn {
+		display: inline-block;
+		padding: 0.7rem 1.4rem;
+		border-radius: var(--radius-full);
+		border: 1px solid rgb(255 255 255 / 0.5);
+		color: #ffffff;
+		font-weight: 600;
+		text-decoration: none;
+	}
+
+	.hero__btn:hover {
+		background: rgb(255 255 255 / 0.12);
+	}
+
+	.hero__btn--gold {
+		background: var(--dd-gold, #cdb77d);
+		border-color: var(--dd-gold, #cdb77d);
+		color: #0e1838;
+	}
+
+	.hero__btn--gold:hover {
+		background: var(--dd-gold-light, #e0cf9f);
+	}
+
+	/* The repo-to-site diagram beside the hero copy */
+	.flow {
+		display: flex;
+		flex-direction: column;
+		align-items: stretch;
+		gap: var(--spacing-2);
+		margin: 0;
+	}
+
+	.flow__step {
+		display: flex;
+		flex-direction: column;
+		gap: var(--spacing-1);
+		padding: var(--spacing-4) var(--spacing-5);
+		border: 1px solid rgb(255 255 255 / 0.2);
+		border-radius: var(--radius-lg, 12px);
+		background: rgb(255 255 255 / 0.05);
+	}
+
+	.flow__step--gold {
+		border-color: var(--dd-gold, #cdb77d);
+		background: rgb(205 183 125 / 0.12);
+	}
+
+	.flow__label {
+		font-family: var(--font-mono, monospace);
+		font-size: var(--font-size-label);
+		letter-spacing: var(--tracking-wider);
+		text-transform: uppercase;
+		color: var(--dd-gold, #cdb77d);
+	}
+
+	.flow code {
+		font-family: var(--font-mono, monospace);
+		font-size: var(--font-size-sm);
+		color: #ffffff;
+		background: none;
+		padding: 0;
+		overflow-wrap: anywhere;
+	}
+
+	.flow__arrow {
+		font-family: var(--font-mono, monospace);
+		font-size: var(--font-size-xs);
+		color: rgb(255 255 255 / 0.6);
+		padding-inline-start: var(--spacing-5);
+	}
+
+	.section--alt {
+		background: var(--color-fill);
+	}
+
+	.section-head__title {
+		font-size: var(--font-size-3xl);
+		max-width: 40rem;
+	}
+
+	.eyebrow + .section-head__title {
+		margin-block-start: var(--spacing-2);
+	}
+
+	.section-lede {
+		margin-block-start: var(--spacing-3);
+		max-width: 44rem;
+		color: var(--color-text-secondary);
+		font-size: var(--font-size-lg);
+	}
+
+	.pillars,
+	.hosts {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+		gap: var(--spacing-5);
+		margin-block-start: var(--spacing-8);
+	}
+
+	.pillar,
+	.host {
+		padding: var(--spacing-6);
+		background: var(--color-surface);
+		border: 1px solid var(--color-border);
+		border-top: 3px solid var(--dd-gold, #cdb77d);
+		border-radius: var(--radius-lg, 12px);
+	}
+
+	.host {
+		border-top-color: var(--color-brand);
+	}
+
+	.pillar h3,
+	.host h3 {
+		font-size: var(--font-size-xl);
 		margin-block-end: var(--spacing-2);
 	}
 
-	@media (max-width: 720px) {
-		.home-intro {
-			grid-template-columns: minmax(0, 1fr);
-		}
+	.pillar p,
+	.host p {
+		color: var(--color-text-secondary);
+	}
 
-		.home-intro__rss {
-			justify-self: start;
-			margin-block-end: 0;
-		}
+	.steps {
+		list-style: none;
+		counter-reset: step;
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+		gap: var(--spacing-5);
+		margin-block-start: var(--spacing-8);
+		padding: 0;
+	}
+
+	.steps li {
+		counter-increment: step;
+		padding: var(--spacing-6);
+		border: 1px solid var(--color-border);
+		border-radius: var(--radius-lg, 12px);
+		background: var(--color-surface);
+	}
+
+	.steps li::before {
+		content: counter(step);
+		display: grid;
+		place-items: center;
+		width: 2.25rem;
+		height: 2.25rem;
+		margin-block-end: var(--spacing-4);
+		border-radius: var(--radius-full);
+		background: var(--dd-navy, #152253);
+		color: var(--dd-gold, #cdb77d);
+		font-family: var(--font-heading);
+		font-size: var(--font-size-lg);
+	}
+
+	.steps h3 {
+		font-size: var(--font-size-xl);
+		margin-block-end: var(--spacing-2);
+	}
+
+	.steps p {
+		color: var(--color-text-secondary);
+	}
+
+	.steps a {
+		color: var(--color-brand);
+	}
+
+	.terminal {
+		margin-block-start: var(--spacing-8);
+		border-radius: var(--radius-lg, 12px);
+		background: var(--dd-navy-dark, #0e1838);
+		border: 1px solid var(--dd-navy, #152253);
+		overflow: hidden;
+	}
+
+	.terminal__title {
+		padding: var(--spacing-3) var(--spacing-5);
+		font-family: var(--font-mono, monospace);
+		font-size: var(--font-size-label);
+		letter-spacing: var(--tracking-wider);
+		text-transform: uppercase;
+		color: var(--dd-gold, #cdb77d);
+		border-bottom: 1px solid rgb(255 255 255 / 0.1);
+	}
+
+	.terminal pre {
+		margin: 0;
+		padding: var(--spacing-5);
+		overflow-x: auto;
+		background: none;
+	}
+
+	.terminal code {
+		font-family: var(--font-mono, monospace);
+		font-size: var(--font-size-sm);
+		line-height: 1.7;
+		color: #ffffff;
+		background: none;
+	}
+
+	.section-more {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--spacing-3);
+		margin-block-start: var(--spacing-6);
+	}
+
+	.section-more a {
+		color: var(--color-brand);
+	}
+
+	.section-more__sep {
+		color: var(--color-muted);
+	}
+
+	.cta {
+		background: var(--dd-navy, #152253);
+		color: #ffffff;
+		border-top: 3px solid var(--dd-gold, #cdb77d);
+	}
+
+	.cta__inner {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--spacing-6);
+		padding-block: var(--spacing-12, 3rem);
+	}
+
+	.cta .hero__actions {
+		margin-block-start: 0;
+	}
+
+	.cta__title {
+		color: #ffffff;
+		font-size: var(--font-size-3xl);
+		margin-block-end: var(--spacing-3);
+	}
+
+	.cta p {
+		max-width: 42rem;
+		color: rgb(255 255 255 / 0.85);
 	}
 </style>
