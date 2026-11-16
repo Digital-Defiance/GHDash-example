@@ -1,6 +1,6 @@
 # Set up your own site from this template
 
-This repository is a complete EmDash site that builds and runs on GitHub Pages. Nothing in it is tied to one repository name, so you can start your own copy in a few minutes.
+This repository is a complete EmDash site that builds and runs on GitHub Pages, and also on Netlify, Cloudflare Pages or GitLab Pages (see "Other hosts" below). Nothing in it is tied to one repository name, so you can start your own copy in a few minutes.
 
 ## 1. Create your repository
 
@@ -112,6 +112,32 @@ npx ghdash-fonts init   # adds the "fonts" collection with one entry
 ```
 
 Then add `<FontStyles />` before `</head>` in your layout and put `ghdash-fonts build &&` before `astro build` in the `build` script, as this demo does. It also supports Adobe Fonts (loaded from Adobe) and your own font files, which you put in a `custom-fonts/` folder. See the [package README](https://github.com/Digital-Defiance/ghdash-plugins/tree/main/packages/fonts).
+
+## Other hosts: Netlify, Cloudflare Pages, GitLab Pages
+
+GitHub Pages is the default, but the same site builds on other hosts. The address and base path come from the host (see `astro.config.mjs`), and the studio commits to wherever the repository lives, GitHub or GitLab. Scheduled posts, plugin after-hooks and cron need a commit back to the repository, so they keep running in the repository's own CI (GitHub Actions or GitLab CI).
+
+### Hosting on Netlify
+
+1. Netlify → **Add new site → Import an existing project**, pick this repository (on GitHub or GitLab). `netlify.toml` already sets the build command (`npm run build`), the output folder (`dist/client`) and Node 22, so leave the form as it is.
+2. The site is served from the root of its Netlify address or your custom domain. The studio is at `/studio/` and commits to the repository Netlify builds from.
+3. If the repository is on GitHub, add a repository variable (Settings → Secrets and variables → Actions → Variables) `GHDASH_HOST` = `netlify`. The workflow then stops deploying to GitHub Pages but still publishes scheduled posts and runs hooks and cron; its commits make Netlify rebuild. On GitLab, set the same CI/CD variable.
+4. Redirects from the studio become Netlify `_redirects` rules, so they are real 301s.
+
+### Hosting on Cloudflare Pages
+
+1. Run `npx ghdash-pages add-host cloudflare` and set `name` in the new `wrangler.toml` to your Pages project's name. Commit it.
+2. Cloudflare dashboard → **Workers & Pages → Create → Pages → Connect to Git**, pick this repository. Build command `npm run build`, build output directory `dist/client`. Environment variables: `NODE_VERSION` = `22`, `NODE_OPTIONS` = `--max-old-space-size=4096`, and `SITE_URL` = your production address (for example `https://my-site.pages.dev`), because Cloudflare only tells the build each deployment's own address.
+3. Cloudflare doesn't tell the build which repository it cloned. If the studio says it doesn't know where to commit, add `STUDIO_REPO` = `owner/repo` (and `STUDIO_PROVIDER` = `gitlab` for a GitLab project).
+4. As for Netlify, set `GHDASH_HOST` = `cloudflare-pages` on the repository so its CI keeps doing scheduled posts, hooks and cron without deploying.
+
+### Hosting on GitLab Pages
+
+1. Push this repository to a GitLab project (or import it). `.gitlab-ci.yml` builds the site on every push to the default branch and publishes it with GitLab Pages. The site appears at the address under **Deploy → Pages**: `https://<namespace>.gitlab.io/<project>/`, or a unique domain at the root. Either works without editing anything.
+2. Editing: open `/studio/` and paste a GitLab **personal access token** with the **api** scope (User settings → Access tokens; the studio's "What token do I need?" link opens the form filled in). Your account must be allowed to push to the default branch, which by default means Maintainer. A project access token (Settings → Access tokens, role Maintainer, scope api) works too. The token stays in the browser tab and is only sent to your GitLab's API.
+3. Optional, scheduled posts, plugin hooks and cron: create a project access token with role **Maintainer** and scope **write_repository**, add it as a masked CI/CD variable `GHDASH_PUSH_TOKEN`, and add an hourly pipeline schedule (Build → Pipeline schedules) on the default branch. Webhook secrets such as `WEBHOOK_URL` are CI/CD variables too.
+4. Comments: giscus needs a GitHub repository with Discussions. A GitLab site can still use one (point `giscus.json` at any public GitHub repository), or leave comments off. Contact form: set `"issueProject": "group/project"` in `contact.json` (and `"issueHost"` for a self-managed GitLab) to take messages as public GitLab issues.
+5. "Sign in with GitHub" doesn't apply on GitLab; editors paste a token.
 
 ## Keep it current
 

@@ -1,11 +1,13 @@
 ---
 // The real EmDash admin, running in the browser with no server. Experimental: see SPEC.md Phase 2b.
 export const prerender = true;
+import { studioApiOrigin } from "@digitaldefiance/ghdash-pages/host";
 import { getOAuth } from "../../utils/github-oauth.mjs";
 
 const oauth = getOAuth();
 const exchangeOrigin = oauth ? new URL(oauth.exchangeUrl).origin : "";
-const csp = `default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://api.github.com${exchangeOrigin ? ` ${exchangeOrigin}` : ""}; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'`;
+// The git host's API (api.github.com, gitlab.com or a self-managed GitLab) is where the studio commits.
+const csp = `default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' ${studioApiOrigin()}${exchangeOrigin ? ` ${exchangeOrigin}` : ""}; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'`;
 ---
 
 <!doctype html>

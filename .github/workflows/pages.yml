@@ -14,6 +14,11 @@ permissions:
   pages: write
   id-token: write
 
+# When Netlify or Cloudflare Pages hosts the site (repository variable GHDASH_HOST = netlify or cloudflare-pages),
+# this workflow still publishes scheduled posts and runs plugin hooks and cron, but doesn't deploy to GitHub Pages.
+env:
+  DEPLOY_PAGES: ${{ vars.GHDASH_HOST == '' || vars.GHDASH_HOST == 'github-pages' }}
+
 concurrency:
   group: pages
   cancel-in-progress: true
@@ -46,7 +51,7 @@ jobs:
             echo "run=true" >> "$GITHUB_OUTPUT"
           fi
       - id: pages
-        if: steps.due.outputs.run == 'true'
+        if: steps.due.outputs.run == 'true' && env.DEPLOY_PAGES == 'true'
         uses: actions/configure-pages@v5
       - name: Build (content/*.json -> SQLite -> static site)
         if: steps.due.outputs.run == 'true'
@@ -78,13 +83,13 @@ jobs:
             echo "Could not push the published state; the next run will publish it again."
           fi
       - uses: actions/upload-pages-artifact@v3
-        if: steps.due.outputs.run == 'true'
+        if: steps.due.outputs.run == 'true' && env.DEPLOY_PAGES == 'true'
         with:
           path: dist/client
 
   deploy:
     needs: build
-    if: needs.build.outputs.run == 'true'
+    if: needs.build.outputs.run == 'true' && (vars.GHDASH_HOST == '' || vars.GHDASH_HOST == 'github-pages')
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -95,7 +100,7 @@ jobs:
 
   hooks:
     needs: [build, deploy]
-    if: needs.deploy.result == 'success' && needs.build.outputs.hooks_head != ''
+    if: always() && needs.build.result == 'success' && (needs.deploy.result == 'success' || (needs.deploy.result == 'skipped' && vars.GHDASH_HOST != '' && vars.GHDASH_HOST != 'github-pages')) && needs.build.outputs.hooks_head != ''
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

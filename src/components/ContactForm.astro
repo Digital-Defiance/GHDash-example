@@ -1,6 +1,8 @@
 ---
 interface Props {
 	kind?: "form" | "issue";
+	host?: "github" | "gitlab";
+	hostUrl?: string;
 	repo?: string;
 	label?: string;
 	endpoint?: string;
@@ -8,10 +10,25 @@ interface Props {
 	turnstileSiteKey?: string;
 }
 
-const { kind = "form", repo = "", label = "contact", endpoint = "", subject = "", turnstileSiteKey = "" } = Astro.props;
+const { kind = "form", host = "github", hostUrl = "https://gitlab.com", repo = "", label = "contact", endpoint = "", subject = "", turnstileSiteKey = "" } = Astro.props;
 ---
 
-{kind === "issue" ? (
+{kind === "issue" && host === "gitlab" ? (
+	<form class="contact" method="get" action={`${hostUrl}/${repo}/-/issues/new`} target="_blank" rel="noopener">
+		<p class="contact__note">
+			Your message opens as a <strong>public</strong> GitLab issue on {repo}. You need a GitLab account, and anyone can read it. Don't include private details.
+		</p>
+		<label class="contact__field">
+			<span>Subject</span>
+			<input type="text" name="issue[title]" required maxlength="200" />
+		</label>
+		<label class="contact__field">
+			<span>Message</span>
+			<textarea name="issue[description]" required rows="6" maxlength="5000"></textarea>
+		</label>
+		<button type="submit" class="btn">Continue on GitLab</button>
+	</form>
+) : kind === "issue" ? (
 	<form class="contact" method="get" action={`https://github.com/${repo}/issues/new`} target="_blank" rel="noopener">
 		<p class="contact__note">
 			Your message opens as a <strong>public</strong> GitHub issue on {repo}. You need a GitHub account, and anyone can read it. Don't include private details.

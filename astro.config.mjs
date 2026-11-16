@@ -2,14 +2,15 @@ import node from "@astrojs/node";
 import react from "@astrojs/react";
 import { defineConfig, fontProviders } from "astro/config";
 import { embedsPlugin } from "@emdash-cms/plugin-embeds";
+import { basePath, siteUrl } from "@digitaldefiance/ghdash-pages/host";
 import emdash, { local } from "emdash/astro";
 import { sqlite } from "emdash/db";
 import { Features } from "lightningcss";
 
-// GitHub Pages project sites live under /<repo>/. The workflow sets these from the repo;
-// for a custom domain, set SITE_URL and leave BASE_PATH unset.
-const site = process.env.SITE_URL || undefined;
-const base = process.env.BASE_PATH || "/";
+// The address and base path come from the host: GitHub Pages (the workflow passes SITE_URL and BASE_PATH),
+// GitLab Pages (CI_PAGES_URL) or Netlify (always the root). SITE_URL and BASE_PATH override them anywhere.
+const site = siteUrl();
+const base = basePath();
 
 export default defineConfig({
 	site,

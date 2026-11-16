@@ -106,3 +106,14 @@ test("preflight answers for the site's origin only", async () => {
 	assert.equal(res.status, 204);
 	assert.equal(res.headers.get("access-control-allow-origin"), env.ALLOWED_ORIGIN);
 });
+
+test("an issueProject turns on the GitLab issue form, on gitlab.com unless issueHost says otherwise", () => {
+	assert.deepEqual(
+		{ ...getContact(file({ issueProject: "group/sub/site" })) },
+		{ kind: "issue", host: "gitlab", hostUrl: "https://gitlab.com", repo: "group/sub/site", label: "", subject: "", turnstileSiteKey: "", endpoint: "" },
+	);
+	assert.equal(getContact(file({ issueProject: "me/site", issueHost: "https://git.example.org/" })).hostUrl, "https://git.example.org");
+	assert.equal(getContact(file({ issueProject: "me/site", issueHost: "http://git.example.org" })), null);
+	assert.equal(getContact(file({ issueProject: "your-name/your-project" })), null);
+	assert.equal(getContact(file({ issueProject: "nogroup" })), null);
+});
