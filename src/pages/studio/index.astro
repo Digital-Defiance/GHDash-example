@@ -1,7 +1,7 @@
 ---
 // The real EmDash admin, running in the browser with no server. Experimental: see SPEC.md Phase 2b.
 export const prerender = true;
-import { studioApiOrigin } from "@digitaldefiance/ghdash-pages/host";
+import { studioApiOrigin } from "@digitaldefiance/gitdash-pages/host";
 import { getGitLabOAuth, getOAuth } from "../../utils/github-oauth.mjs";
 
 const oauth = getOAuth() ?? getGitLabOAuth();
@@ -26,7 +26,7 @@ const csp = `default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src
 		<script>
 			import "../../studio-plugins";
 			import "../../studio-oauth";
-			import "@digitaldefiance/ghdash-pages/studio/boot.tsx";
+			import "@digitaldefiance/gitdash-pages/studio/boot.tsx";
 		</script>
 	</body>
 </html>

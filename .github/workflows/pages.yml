@@ -14,10 +14,10 @@ permissions:
   pages: write
   id-token: write
 
-# When Netlify or Cloudflare Pages hosts the site (repository variable GHDASH_HOST = netlify or cloudflare-pages),
+# When Netlify or Cloudflare Pages hosts the site (repository variable GITDASH_HOST = netlify or cloudflare-pages),
 # this workflow still publishes scheduled posts and runs plugin hooks and cron, but doesn't deploy to GitHub Pages.
 env:
-  DEPLOY_PAGES: ${{ vars.GHDASH_HOST == '' || vars.GHDASH_HOST == 'github-pages' }}
+  DEPLOY_PAGES: ${{ vars.GITDASH_HOST == '' || vars.GITDASH_HOST == 'github-pages' }}
 
 concurrency:
   group: pages
@@ -44,7 +44,7 @@ jobs:
           echo "head=${{ github.sha }}" >> "$GITHUB_OUTPUT"
       - id: due
         run: |
-          if [ "${{ github.event_name }}" = "schedule" ] && [ "$(npx ghdash-pages due)" != "true" ]; then
+          if [ "${{ github.event_name }}" = "schedule" ] && [ "$(npx gitdash-pages due)" != "true" ]; then
             echo "run=false" >> "$GITHUB_OUTPUT"
             echo "No scheduled content is due, skipping the build."
           else
@@ -89,7 +89,7 @@ jobs:
 
   deploy:
     needs: build
-    if: needs.build.outputs.run == 'true' && (vars.GHDASH_HOST == '' || vars.GHDASH_HOST == 'github-pages')
+    if: needs.build.outputs.run == 'true' && (vars.GITDASH_HOST == '' || vars.GITDASH_HOST == 'github-pages')
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -100,7 +100,7 @@ jobs:
 
   hooks:
     needs: [build, deploy]
-    if: always() && needs.build.result == 'success' && (needs.deploy.result == 'success' || (needs.deploy.result == 'skipped' && vars.GHDASH_HOST != '' && vars.GHDASH_HOST != 'github-pages')) && needs.build.outputs.hooks_head != ''
+    if: always() && needs.build.result == 'success' && (needs.deploy.result == 'success' || (needs.deploy.result == 'skipped' && vars.GITDASH_HOST != '' && vars.GITDASH_HOST != 'github-pages')) && needs.build.outputs.hooks_head != ''
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -120,7 +120,7 @@ jobs:
           [ -f hooks.config.json ] || { echo "No hooks.config.json, nothing to run."; exit 0; }
           git fetch --force origin "refs/tags/hooks-last:refs/tags/hooks-last" 2>/dev/null || true
           base=$(git rev-parse -q --verify hooks-last || echo "${{ needs.build.outputs.hooks_base }}")
-          npx ghdash-pages run-hooks --base "$base" --head HEAD
+          npx gitdash-pages run-hooks --base "$base" --head HEAD
           git tag -f hooks-last HEAD
           git push --force origin refs/tags/hooks-last
 
@@ -145,7 +145,7 @@ jobs:
           git fetch --force origin "refs/tags/cron-last:refs/tags/cron-last" 2>/dev/null || true
           since=$(git for-each-ref refs/tags/cron-last --format='%(creatordate:iso-strict)')
           now=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-          npx ghdash-pages run-cron ${since:+--since "$since"} --now "$now"
+          npx gitdash-pages run-cron ${since:+--since "$since"} --now "$now"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git tag -f -a cron-last -m "$now" HEAD

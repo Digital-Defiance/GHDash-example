@@ -24,7 +24,7 @@ jobs:
           cache: npm
       - run: npm ci
       - name: Build studio data
-        run: npm run db && npx ghdash-pages studio-assets
+        run: npm run db && npx gitdash-pages studio-assets
       - name: Check the secret is set
         env:
           GH_TOKEN: ${{ secrets.GHDASH_LIVE_TOKEN }}

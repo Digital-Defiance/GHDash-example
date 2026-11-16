@@ -18,7 +18,7 @@ function tree(dir, prefix = "") {
 
 test("content/ -> data.db -> content/ gives back the same files", { skip: !existsSync("data.db") }, () => {
 	const out = join(mkdtempSync(join(tmpdir(), "roundtrip-")), "content");
-	execFileSync("npx", ["ghdash-pages", "export-content", "data.db", out], { stdio: "pipe" });
+	execFileSync("npx", ["gitdash-pages", "export-content", "data.db", out], { stdio: "pipe" });
 	const before = tree("content");
 	const after = tree(out);
 	assert.deepEqual([...after.keys()], [...before.keys()]);

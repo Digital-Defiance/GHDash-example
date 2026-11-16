@@ -2,7 +2,7 @@ import node from "@astrojs/node";
 import react from "@astrojs/react";
 import { defineConfig, fontProviders } from "astro/config";
 import { embedsPlugin } from "@emdash-cms/plugin-embeds";
-import { basePath, siteUrl } from "@digitaldefiance/ghdash-pages/host";
+import { basePath, siteUrl } from "@digitaldefiance/gitdash-pages/host";
 import emdash, { local } from "emdash/astro";
 import { sqlite } from "emdash/db";
 import { Features } from "lightningcss";

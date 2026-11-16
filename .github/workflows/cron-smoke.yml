@@ -1,6 +1,6 @@
 name: Cron smoke test
 
-# Proves, on a real runner and with the adapter installed from npm, that `ghdash-pages run-cron` finds a plugin's cron job and runs its hook.
+# Proves, on a real runner and with the adapter installed from npm, that `gitdash-pages run-cron` finds a plugin's cron job and runs its hook.
 # Run it from the Actions tab (workflow_dispatch) after changing the adapter version.
 
 on:
@@ -21,7 +21,7 @@ jobs:
       - run: npm ci
       - name: Run a fixture plugin's hourly job through the adapter
         run: |
-          bin="$GITHUB_WORKSPACE/node_modules/@digitaldefiance/ghdash-pages/bin/ghdash-pages.mjs"
+          bin="$GITHUB_WORKSPACE/node_modules/@digitaldefiance/gitdash-pages/bin/gitdash-pages.mjs"
           dir="$(mktemp -d)"
           cd "$dir"
           echo '{}' > package.json

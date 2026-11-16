@@ -1,15 +1,15 @@
-# GHDash example
+# GitDash example
 
-An [EmDash](https://github.com/Digital-Defiance/ghdash) blog that runs entirely on GitHub Pages. There is no server and no database service: the content lives as JSON in `content/`, and a GitHub Action builds it into a static site on every push.
+An [EmDash](https://github.com/Digital-Defiance/gitdash) blog that runs entirely on GitHub Pages. There is no server and no database service: the content lives as JSON in `content/`, and a GitHub Action builds it into a static site on every push.
 
-Design and progress: [SPEC.md and TODO.md in the main repo](https://github.com/Digital-Defiance/ghdash/tree/main/ghpages-port).
+Design and progress: [SPEC.md and TODO.md in the main repo](https://github.com/Digital-Defiance/gitdash/tree/main/ghpages-port).
 
 Want your own? See [SETUP.md](SETUP.md): use this repository as a template, turn on Pages, and paste a token.
 
 ## How it works
 
 ```
-content/*.json  ──►  ghdash-pages build-db  ──►  data.db (SQLite)  ──►  astro build  ──►  dist/client  ──►  Pages
+content/*.json  ──►  gitdash-pages build-db  ──►  data.db (SQLite)  ──►  astro build  ──►  dist/client  ──►  Pages
  (this repo)         emdash init + import        throwaway, in CI       static pages
 ```
 
@@ -42,7 +42,7 @@ SETUP.md walks through each of these, all optional:
 - scheduled posts (hourly workflow), webhooks and plugin cron jobs, importing a Jekyll site or Markdown folder, responsive images, search (Pagefind), sitemap, robots and redirects;
 - comments (below), a contact form (below), and "Sign in with GitHub" for the studio.
 
-The build scripts and the studio live in the npm package [`@digitaldefiance/ghdash-pages`](https://www.npmjs.com/package/@digitaldefiance/ghdash-pages); the patched admin, core and browser API come from the `pages-v*` release assets on `Digital-Defiance/ghdash` (see `package.json` `overrides`). Run `npm test` for unit tests and `npm run test:e2e` for the browser suite.
+The build scripts and the studio live in the npm package [`@digitaldefiance/gitdash-pages`](https://www.npmjs.com/package/@digitaldefiance/gitdash-pages); the patched admin, core and browser API come from the `pages-v*` release assets on `Digital-Defiance/gitdash` (see `package.json` `overrides`). Run `npm test` for unit tests and `npm run test:e2e` for the browser suite.
 
 ## Contact form
 
@@ -58,6 +58,6 @@ Posts show a [giscus](https://giscus.app) discussion thread when `giscus.json` e
 
 Without `giscus.json` there is no comment section.
 
-Live site: https://digital-defiance.github.io/GHDash-example/
+Live site: https://digital-defiance.github.io/GitDash-example/
 
 Regenerate `content/` from a local EmDash database with `npm run export-content` after editing in `emdash dev` or the CLI.

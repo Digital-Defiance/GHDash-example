@@ -11,7 +11,7 @@ test("import-markdown turns a Jekyll site into posts and pages in content/, with
 	cpSync("content", join(work, "content"), { recursive: true });
 	cpSync("package.json", join(work, "package.json"));
 	symlinkSync(resolve("node_modules"), join(work, "node_modules"));
-	const bin = resolve("node_modules/@digitaldefiance/ghdash-pages/bin/ghdash-pages.mjs");
+	const bin = resolve("node_modules/@digitaldefiance/gitdash-pages/bin/gitdash-pages.mjs");
 	const run = (...args) => spawnSync(process.execPath, [bin, ...args], { cwd: work, encoding: "utf8" });
 
 	const first = run("import-markdown", resolve("test/fixtures/jekyll"));

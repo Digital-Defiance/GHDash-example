@@ -5,10 +5,10 @@ import init from "@sqlite.org/sqlite-wasm";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
-import { createController } from "@digitaldefiance/ghdash-pages/studio/controller.js";
-import { commitFiles } from "@digitaldefiance/ghdash-pages/studio/github-commit.js";
-import { openDb } from "@digitaldefiance/ghdash-pages/studio/load-db.js";
-import { snapshot } from "@digitaldefiance/ghdash-pages/studio/tray.js";
+import { createController } from "@digitaldefiance/gitdash-pages/studio/controller.js";
+import { commitFiles } from "@digitaldefiance/gitdash-pages/studio/github-commit.js";
+import { openDb } from "@digitaldefiance/gitdash-pages/studio/load-db.js";
+import { snapshot } from "@digitaldefiance/gitdash-pages/studio/tray.js";
 
 const content = JSON.parse(readFileSync("public/studio-data/content.json", "utf8"));
 const [owner, repo] = content.meta.repo.split("/");

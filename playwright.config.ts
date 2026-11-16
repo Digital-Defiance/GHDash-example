@@ -10,7 +10,7 @@ export default defineConfig({
 	reporter: process.env.CI ? [["github"], ["list"]] : "list",
 	use: { baseURL: `http://localhost:${port}${BASE}/`, trace: "off" },
 	webServer: {
-		command: "npx ghdash-pages serve",
+		command: "npx gitdash-pages serve",
 		url: `http://localhost:${port}${BASE}/`,
 		reuseExistingServer: !process.env.CI,
 		env: { BASE_PATH: BASE, PORT: String(port) },

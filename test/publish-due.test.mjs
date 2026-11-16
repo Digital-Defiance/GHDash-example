@@ -7,7 +7,7 @@ import { join } from "node:path";
 import { DatabaseSync } from "node:sqlite";
 import { test } from "node:test";
 
-const cli = (...args) => execFileSync("npx", ["ghdash-pages", ...args], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] });
+const cli = (...args) => execFileSync("npx", ["gitdash-pages", ...args], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] });
 
 test("a scheduled post that is due gets published at its scheduled time and one in the future does not", { skip: !existsSync("public/studio-api/entry.js") }, () => {
 	const dir = mkdtempSync(join(tmpdir(), "publish-due-"));

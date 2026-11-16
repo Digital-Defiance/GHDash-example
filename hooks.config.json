@@ -1,5 +1,5 @@
 {
-	"site": { "name": "GHDash example", "url": "https://digital-defiance.github.io/GHDash-example/" },
+	"site": { "name": "GitDash example", "url": "https://digital-defiance.github.io/GitDash-example/" },
 	"plugins": [
 		{
 			"id": "webhook-notifier",

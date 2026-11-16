@@ -15,7 +15,7 @@ const readJson = (file) => {
  * Which comments the posts show: "gitlab" when the repository is on GitLab, "giscus" when giscus.json is filled in, else null.
  * comments.json { "provider": "gitlab" | "giscus" | "off" } overrides the choice.
  */
-export function commentsProvider({ settings = "comments.json", gitlab = ".ghdash/gitlab-comments.json" } = {}) {
+export function commentsProvider({ settings = "comments.json", gitlab = ".gitdash/gitlab-comments.json" } = {}) {
 	const wanted = readJson(settings)?.provider;
 	if (wanted === "off") return null;
 	const onGitLab = readJson(gitlab)?.provider === "gitlab";
@@ -25,8 +25,8 @@ export function commentsProvider({ settings = "comments.json", gitlab = ".ghdash
 	return getGiscus() ? "giscus" : null;
 }
 
-/** The comments for one post from .ghdash/gitlab-comments.json, and where to add one. */
-export function gitlabThread(term, file = ".ghdash/gitlab-comments.json") {
+/** The comments for one post from .gitdash/gitlab-comments.json, and where to add one. */
+export function gitlabThread(term, file = ".gitdash/gitlab-comments.json") {
 	const data = readJson(file);
 	if (!data || data.provider !== "gitlab") return null;
 	const post = data.posts?.[term];

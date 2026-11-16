@@ -5,7 +5,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
 
-import { eventsFromDiff, runHooks } from "@digitaldefiance/ghdash-pages/hooks";
+import { eventsFromDiff, runHooks } from "@digitaldefiance/gitdash-pages/hooks";
 
 const row = { id: "01A", slug: "hello", status: "published", title: "Hello", created_at: "t1", updated_at: "t2", published_at: "t3", draft_revision_id: "r1" };
 
@@ -56,7 +56,7 @@ test("run-hooks finds the changed content between two commits and runs the plugi
 	writeFileSync(join(dir, "content/ec_posts/01B.json"), JSON.stringify({ ...row, id: "01B" }));
 	sh("add", "-A");
 	sh("commit", "-qm", "two");
-	const bin = join(process.cwd(), "node_modules/@digitaldefiance/ghdash-pages/bin/ghdash-pages.mjs");
+	const bin = join(process.cwd(), "node_modules/@digitaldefiance/gitdash-pages/bin/gitdash-pages.mjs");
 	execFileSync(process.execPath, [bin, "run-hooks", "--base", base, "--head", "HEAD"], { cwd: dir, env: { ...process.env, MARK: "yes" }, stdio: "pipe" });
 	const seen = execFileSync("cat", ["seen.txt"], { cwd: dir, encoding: "utf8" }).trim().split("\n").sort();
 	assert.deepEqual(seen, ["posts:01A:false:yes", "posts:01B:true:yes"]);
@@ -65,7 +65,7 @@ test("run-hooks finds the changed content between two commits and runs the plugi
 test("run-hooks with no base commit does nothing and succeeds", () => {
 	const dir = mkdtempSync(join(tmpdir(), "hooks-"));
 	writeFileSync(join(dir, "hooks.config.json"), JSON.stringify({ plugins: [] }));
-	const bin = join(process.cwd(), "node_modules/@digitaldefiance/ghdash-pages/bin/ghdash-pages.mjs");
+	const bin = join(process.cwd(), "node_modules/@digitaldefiance/gitdash-pages/bin/gitdash-pages.mjs");
 	const out = execFileSync(process.execPath, [bin, "run-hooks", "--base", "0000000000000000000000000000000000000000"], { cwd: dir, encoding: "utf8" });
 	assert.match(out, /nothing to run/);
 });

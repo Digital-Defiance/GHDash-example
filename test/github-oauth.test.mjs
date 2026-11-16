@@ -17,6 +17,6 @@ test("a client ID and an https exchange address turn sign-in on; the example, a 
 	assert.equal(getOAuth(join(tmpdir(), "nope.json")), null);
 	assert.equal(getOAuth(file("{ nope")), null);
 	assert.equal(getOAuth(file({ clientId: "Iv1.xxxxxxxxxxxxxxxx", exchangeUrl: "https://signin.me.workers.dev/" })), null);
-	assert.equal(getOAuth(file({ clientId: "Iv1.abc", exchangeUrl: "https://ghdash-sign-in.example.com/" })), null);
+	assert.equal(getOAuth(file({ clientId: "Iv1.abc", exchangeUrl: "https://gitdash-sign-in.example.com/" })), null);
 	assert.equal(getOAuth(file({ clientId: "Iv1.abc", exchangeUrl: "http://signin.me.workers.dev/" })), null);
 });

@@ -46,7 +46,7 @@ A plugin entry in `hooks.config.json` can list `cron` jobs, for example `"cron":
 
 ## 8. Optional: bring in an existing Jekyll or Markdown site
 
-From the root of your site, run `npx ghdash-pages import-markdown ../your-old-site --dry-run` to see what it finds, then run it again without `--dry-run`. It writes posts, drafts and pages (with tags, dates and local images) into `content/` and `media/`. Look over `git diff`, commit, and the Action publishes them. Running it twice is safe: entries that already exist are skipped. Liquid tags that have no static equivalent are removed and listed as warnings.
+From the root of your site, run `npx gitdash-pages import-markdown ../your-old-site --dry-run` to see what it finds, then run it again without `--dry-run`. It writes posts, drafts and pages (with tags, dates and local images) into `content/` and `media/`. Look over `git diff`, commit, and the Action publishes them. Running it twice is safe: entries that already exist are skipped. Liquid tags that have no static equivalent are removed and listed as warnings.
 
 ## 9. Optional: a contact form
 
@@ -74,8 +74,8 @@ Without this, editors paste a fine-grained token. With it, the studio also shows
 1. On GitHub: Settings, Developer settings, GitHub Apps, **New GitHub App**. Callback URL: your studio address, for example `https://your-name.github.io/your-repo/studio/`. Untick **Webhook**. Repository permissions: **Contents: Read and write**. Create the app, copy its **Client ID**, and generate a **client secret** (keep the page open for the next step).
 2. Install the app on your site's repository (the app's **Install App** tab). A signed-in editor can then only change repositories they can write to and the app is installed on.
 3. From your site folder, deploy the Worker. Replace the two values:
-   `npx wrangler deploy node_modules/@digitaldefiance/ghdash-pages/worker/github-oauth.mjs --name ghdash-sign-in --var ALLOWED_ORIGIN:https://your-name.github.io --var GITHUB_CLIENT_ID:<client id>`
-   Then run `npx wrangler secret put GITHUB_CLIENT_SECRET --name ghdash-sign-in` and paste the client secret at the prompt. Don't put it in a file, a commit or a chat.
+   `npx wrangler deploy node_modules/@digitaldefiance/gitdash-pages/worker/github-oauth.mjs --name gitdash-sign-in --var ALLOWED_ORIGIN:https://your-name.github.io --var GITHUB_CLIENT_ID:<client id>`
+   Then run `npx wrangler secret put GITHUB_CLIENT_SECRET --name gitdash-sign-in` and paste the client secret at the prompt. Don't put it in a file, a commit or a chat.
 4. Copy `github-oauth.example.json` to `github-oauth.json`, fill in the client ID and the Worker's address (it ends in `.workers.dev`), and commit it. Both are public.
 
 GitHub App tokens last eight hours, then the studio asks the editor to sign in again. Pending edits stay in the browser meanwhile.
@@ -100,7 +100,7 @@ npx ghdash-team        # adds the collection and three sample members to content
 cp -r node_modules/@digitaldefiance/ghdash-team/templates/team src/pages/team
 ```
 
-See the [package README](https://github.com/Digital-Defiance/ghdash-plugins/tree/main/packages/team) for the fields and component options.
+See the [package README](https://github.com/Digital-Defiance/gitdash-plugins/tree/main/packages/team) for the fields and component options.
 
 ## 13. Optional: choose fonts
 
@@ -111,7 +111,7 @@ npm install @digitaldefiance/ghdash-fonts
 npx ghdash-fonts init   # adds the "fonts" collection with one entry
 ```
 
-Then add `<FontStyles />` before `</head>` in your layout and put `ghdash-fonts build &&` before `astro build` in the `build` script, as this demo does. It also supports Adobe Fonts (loaded from Adobe) and your own font files, which you put in a `custom-fonts/` folder. See the [package README](https://github.com/Digital-Defiance/ghdash-plugins/tree/main/packages/fonts).
+Then add `<FontStyles />` before `</head>` in your layout and put `ghdash-fonts build &&` before `astro build` in the `build` script, as this demo does. It also supports Adobe Fonts (loaded from Adobe) and your own font files, which you put in a `custom-fonts/` folder. See the [package README](https://github.com/Digital-Defiance/gitdash-plugins/tree/main/packages/fonts).
 
 ## Other hosts: Netlify, Cloudflare Pages, GitLab Pages
 
@@ -121,21 +121,21 @@ GitHub Pages is the default, but the same site builds on other hosts. The addres
 
 1. Netlify → **Add new site → Import an existing project**, pick this repository (on GitHub or GitLab). `netlify.toml` already sets the build command (`npm run build`), the output folder (`dist/client`) and Node 22, so leave the form as it is.
 2. The site is served from the root of its Netlify address or your custom domain. The studio is at `/studio/` and commits to the repository Netlify builds from.
-3. If the repository is on GitHub, add a repository variable (Settings → Secrets and variables → Actions → Variables) `GHDASH_HOST` = `netlify`. The workflow then stops deploying to GitHub Pages but still publishes scheduled posts and runs hooks and cron; its commits make Netlify rebuild. On GitLab, set the same CI/CD variable.
+3. If the repository is on GitHub, add a repository variable (Settings → Secrets and variables → Actions → Variables) `GITDASH_HOST` = `netlify`. The workflow then stops deploying to GitHub Pages but still publishes scheduled posts and runs hooks and cron; its commits make Netlify rebuild. On GitLab, set the same CI/CD variable.
 4. Redirects from the studio become Netlify `_redirects` rules, so they are real 301s.
 
 ### Hosting on Cloudflare Pages
 
-1. Run `npx ghdash-pages add-host cloudflare` and set `name` in the new `wrangler.toml` to your Pages project's name. Commit it.
+1. Run `npx gitdash-pages add-host cloudflare` and set `name` in the new `wrangler.toml` to your Pages project's name. Commit it.
 2. Cloudflare dashboard → **Workers & Pages → Create → Pages → Connect to Git**, pick this repository. Build command `npm run build`, build output directory `dist/client`. Environment variables: `NODE_VERSION` = `22`, `NODE_OPTIONS` = `--max-old-space-size=4096`, and `SITE_URL` = your production address (for example `https://my-site.pages.dev`), because Cloudflare only tells the build each deployment's own address.
 3. Cloudflare doesn't tell the build which repository it cloned. If the studio says it doesn't know where to commit, add `STUDIO_REPO` = `owner/repo` (and `STUDIO_PROVIDER` = `gitlab` for a GitLab project).
-4. As for Netlify, set `GHDASH_HOST` = `cloudflare-pages` on the repository so its CI keeps doing scheduled posts, hooks and cron without deploying.
+4. As for Netlify, set `GITDASH_HOST` = `cloudflare-pages` on the repository so its CI keeps doing scheduled posts, hooks and cron without deploying.
 
 ### Hosting on GitLab Pages
 
 1. Push this repository to a GitLab project (or import it). `.gitlab-ci.yml` builds the site on every push to the default branch and publishes it with GitLab Pages. The site appears at the address under **Deploy → Pages**: `https://<namespace>.gitlab.io/<project>/`, or a unique domain at the root. Either works without editing anything.
 2. Editing: open `/studio/` and paste a GitLab **personal access token** with the **api** scope (User settings → Access tokens; the studio's "What token do I need?" link opens the form filled in). Your account must be allowed to push to the default branch, which by default means Maintainer. A project access token (Settings → Access tokens, role Maintainer, scope api) works too. The token stays in the browser tab and is only sent to your GitLab's API.
-3. Optional, scheduled posts, plugin hooks and cron: create a project access token with role **Maintainer** and scope **write_repository**, add it as a masked CI/CD variable `GHDASH_PUSH_TOKEN`, and add an hourly pipeline schedule (Build → Pipeline schedules) on the default branch. Webhook secrets such as `WEBHOOK_URL` are CI/CD variables too.
+3. Optional, scheduled posts, plugin hooks and cron: create a project access token with role **Maintainer** and scope **write_repository**, add it as a masked CI/CD variable `GITDASH_PUSH_TOKEN`, and add an hourly pipeline schedule (Build → Pipeline schedules) on the default branch. Webhook secrets such as `WEBHOOK_URL` are CI/CD variables too.
 4. Comments: giscus needs a GitHub repository with Discussions. A GitLab site can still use one (point `giscus.json` at any public GitHub repository), or leave comments off. Contact form: set `"issueProject": "group/project"` in `contact.json` (and `"issueHost"` for a self-managed GitLab) to take messages as public GitLab issues.
 5. Optional, "Sign in with GitLab" instead of pasting a token: User settings → Applications → **Add new application**. Redirect URI: the site's `/studio/` address. Untick **Confidential**, tick the **api** scope. Copy `gitlab-oauth.example.json` to `gitlab-oauth.json` and put the Application ID in `clientId`. No Worker or secret is needed. Sign-ins last two hours.
 

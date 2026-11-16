@@ -1,11 +1,11 @@
-// node --test test/   (needs `npm run db && ghdash-pages studio-assets` first)
+// node --test test/   (needs `npm run db && gitdash-pages studio-assets` first)
 import init from "@sqlite.org/sqlite-wasm";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { before, test } from "node:test";
 
-import { openDb } from "@digitaldefiance/ghdash-pages/studio/load-db.js";
-import { applyDdl, applyFile, diffFiles, expandLegacyRevisions, filesFromContent, mergeRemote, revisionPathsFor, snapshot, visibleChanges } from "@digitaldefiance/ghdash-pages/studio/tray.js";
+import { openDb } from "@digitaldefiance/gitdash-pages/studio/load-db.js";
+import { applyDdl, applyFile, diffFiles, expandLegacyRevisions, filesFromContent, mergeRemote, revisionPathsFor, snapshot, visibleChanges } from "@digitaldefiance/gitdash-pages/studio/tray.js";
 
 let sqlite, content, empty;
 before(async () => {

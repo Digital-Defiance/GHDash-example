@@ -1,5 +1,5 @@
 {
-  "name": "ghdash-example",
+  "name": "gitdash-example",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -8,10 +8,10 @@
     "seed": "seed/seed.json"
   },
   "scripts": {
-    "db": "ghdash-pages build-db",
-    "build": "npm run db && ghdash-pages fetch-browser-api && ghdash-pages publish-due && ghdash-pages studio-assets && ghdash-pages copy-media && ghdash-pages gitlab-comments && ghdash-fonts build && astro build && ghdash-pages finish && pagefind --site dist/client",
+    "db": "gitdash-pages build-db",
+    "build": "npm run db && gitdash-pages fetch-browser-api && gitdash-pages publish-due && gitdash-pages studio-assets && gitdash-pages copy-media && gitdash-pages gitlab-comments && ghdash-fonts build && astro build && gitdash-pages finish && pagefind --site dist/client",
     "preview": "npx serve dist/client",
-    "export-content": "ghdash-pages export-content data.db content",
+    "export-content": "gitdash-pages export-content data.db content",
     "test:e2e": "playwright test",
     "test": "node --test test/*.test.mjs"
   },
@@ -31,7 +31,7 @@
     "react-dom": "19.2.4"
   },
   "devDependencies": {
-    "@digitaldefiance/ghdash-pages": "^0.13.2",
+    "@digitaldefiance/gitdash-pages": "^0.14.0",
     "@emdash-cms/plugin-webhook-notifier": "^0.2.3",
     "@playwright/test": "^1.63.0",
     "lightningcss": "1.33.0",
