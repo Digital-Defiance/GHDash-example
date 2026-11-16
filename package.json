@@ -9,7 +9,7 @@
   },
   "scripts": {
     "db": "gitdash-pages build-db",
-    "build": "npm run db && gitdash-pages fetch-browser-api && gitdash-pages publish-due && gitdash-pages studio-assets && gitdash-pages copy-media && gitdash-pages gitlab-comments && ghdash-fonts build && astro build && gitdash-pages finish && pagefind --site dist/client",
+    "build": "npm run db && gitdash-pages fetch-browser-api && gitdash-pages publish-due && gitdash-pages studio-assets && gitdash-pages copy-media && gitdash-pages gitlab-comments && gitdash-fonts build && astro build && gitdash-pages finish && pagefind --site dist/client",
     "preview": "npx serve dist/client",
     "export-content": "gitdash-pages export-content data.db content",
     "test:e2e": "playwright test",
@@ -18,8 +18,8 @@
   "dependencies": {
     "@astrojs/node": "11.1.5",
     "@astrojs/react": "7.0.0",
-    "@digitaldefiance/ghdash-fonts": "^0.2.0",
-    "@digitaldefiance/ghdash-team": "^0.1.0",
+    "@digitaldefiance/gitdash-fonts": "^0.3.0",
+    "@digitaldefiance/gitdash-team": "^0.2.0",
     "@emdash-cms/admin": "https://github.com/Digital-Defiance/ghdash/releases/download/pages-v0.6.0/emdash-cms-admin-1.5.0.tgz",
     "@emdash-cms/plugin-color": "^0.2.1",
     "@emdash-cms/plugin-embeds": "^0.1.59",

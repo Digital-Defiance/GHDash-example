@@ -92,26 +92,26 @@ Limits in the static studio:
 
 ## 12. Optional: a team page
 
-The `@digitaldefiance/ghdash-team` package (already installed here) gives you a `team` collection, a `TeamGrid` component, `/team` and a page per member. Edit members in the studio like any other content. To add it to another site:
+The `@digitaldefiance/gitdash-team` package (already installed here) gives you a `team` collection, a `TeamGrid` component, `/team` and a page per member. Edit members in the studio like any other content. To add it to another site:
 
 ```sh
-npm install @digitaldefiance/ghdash-team
-npx ghdash-team        # adds the collection and three sample members to content/
-cp -r node_modules/@digitaldefiance/ghdash-team/templates/team src/pages/team
+npm install @digitaldefiance/gitdash-team
+npx gitdash-team        # adds the collection and three sample members to content/
+cp -r node_modules/@digitaldefiance/gitdash-team/templates/team src/pages/team
 ```
 
 See the [package README](https://github.com/Digital-Defiance/gitdash-plugins/tree/main/packages/team) for the fields and component options.
 
 ## 13. Optional: choose fonts
 
-The `@digitaldefiance/ghdash-fonts` package lets you pick Google Fonts, sizes, colors and per-element rules in the studio (the "Fonts" collection). The build downloads the font files into your site, so visitors make no requests to Google.
+The `@digitaldefiance/gitdash-fonts` package lets you pick Google Fonts, sizes, colors and per-element rules in the studio (the "Fonts" collection). The build downloads the font files into your site, so visitors make no requests to Google.
 
 ```sh
-npm install @digitaldefiance/ghdash-fonts
-npx ghdash-fonts init   # adds the "fonts" collection with one entry
+npm install @digitaldefiance/gitdash-fonts
+npx gitdash-fonts init   # adds the "fonts" collection with one entry
 ```
 
-Then add `<FontStyles />` before `</head>` in your layout and put `ghdash-fonts build &&` before `astro build` in the `build` script, as this demo does. It also supports Adobe Fonts (loaded from Adobe) and your own font files, which you put in a `custom-fonts/` folder. See the [package README](https://github.com/Digital-Defiance/gitdash-plugins/tree/main/packages/fonts).
+Then add `<FontStyles />` before `</head>` in your layout and put `gitdash-fonts build &&` before `astro build` in the `build` script, as this demo does. It also supports Adobe Fonts (loaded from Adobe) and your own font files, which you put in a `custom-fonts/` folder. See the [package README](https://github.com/Digital-Defiance/gitdash-plugins/tree/main/packages/fonts).
 
 ## Other hosts: Netlify, Cloudflare Pages, GitLab Pages
 
