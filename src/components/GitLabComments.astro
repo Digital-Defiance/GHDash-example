@@ -1,0 +1,50 @@
+---
+// Comments kept as notes on a GitLab issue, read at build time (ghdash-pages gitlab-comments). Visitors comment on GitLab.
+import { gitlabThread } from "../utils/comments.mjs";
+
+interface Props {
+	/** The post's id: the issue is titled "Comments: <term>". */
+	term: string;
+}
+
+const thread = gitlabThread(Astro.props.term);
+const paragraphs = (body: string) => body.split(/\n{2,}/).map((p) => p.trim()).filter(Boolean);
+const when = (iso: string) => new Date(iso).toLocaleDateString("en", { year: "numeric", month: "short", day: "numeric" });
+---
+
+{
+	thread && (
+		<div class="gl-comments" data-gitlab-comments>
+			{thread.comments.length === 0 && <p class="gl-comments__empty">No comments yet.</p>}
+			<ol class="gl-comments__list">
+				{thread.comments.map((c) => (
+					<li class="gl-comment" id={`comment-${c.id}`}>
+						<header class="gl-comment__meta">
+							{c.author.avatarUrl && <img src={c.author.avatarUrl} alt="" width="28" height="28" loading="lazy" />}
+							<a href={c.author.url} rel="nofollow noopener">{c.author.name || c.author.username}</a>
+							<a class="gl-comment__date" href={c.url} rel="nofollow noopener">
+								<time datetime={c.createdAt}>{when(c.createdAt)}</time>
+							</a>
+						</header>
+						{paragraphs(c.body).map((p) => <p>{p}</p>)}
+					</li>
+				))}
+			</ol>
+			{thread.open ? (
+				<a class="btn" href={thread.commentUrl} target="_blank" rel="noopener">Comment on GitLab</a>
+			) : (
+				<p class="gl-comments__closed">Comments are closed.</p>
+			)}
+			<p class="gl-comments__note">You need a GitLab account. Comments are public and show here after the site's next build.</p>
+		</div>
+	)
+}
+
+<style>
+	.gl-comments__list { list-style: none; padding: 0; margin: 0 0 var(--spacing-6); display: grid; gap: var(--spacing-6); }
+	.gl-comment__meta { display: flex; align-items: center; gap: var(--spacing-2); font-size: 0.9em; margin-block-end: var(--spacing-2); }
+	.gl-comment__meta img { border-radius: 50%; }
+	.gl-comment__date { color: var(--color-muted); margin-inline-start: auto; }
+	.gl-comment p { margin: 0 0 var(--spacing-2); white-space: pre-wrap; overflow-wrap: anywhere; }
+	.gl-comments__note, .gl-comments__empty, .gl-comments__closed { font-size: 0.9em; color: var(--color-muted); }
+</style>

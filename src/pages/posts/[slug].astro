@@ -15,7 +15,8 @@ import {
 } from "emdash";
 import { Image, PortableText, WidgetArea } from "emdash/ui";
 import Giscus from "../../components/Giscus.astro";
-import { getGiscus } from "../../utils/giscus.mjs";
+import GitLabComments from "../../components/GitLabComments.astro";
+import { commentsProvider } from "../../utils/comments.mjs";
 import Base from "../../layouts/Base.astro";
 import Byline from "../../components/Byline.astro";
 import PostCard from "../../components/PostCard.astro";
@@ -245,10 +246,10 @@ const hasHeadings = (post.data.content ?? []).some(
 					</div>
 
 					{
-						getGiscus() && (
+						commentsProvider() && (
 							<section class="post-comments" aria-labelledby="comments-title">
 								<h2 id="comments-title" class="eyebrow">Discussion</h2>
-								<Giscus term={post.id} />
+								{commentsProvider() === "gitlab" ? <GitLabComments term={post.id} /> : <Giscus term={post.id} />}
 							</section>
 						)
 					}
