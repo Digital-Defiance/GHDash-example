@@ -1,6 +1,6 @@
 // Real-GitHub check of the tray's commit and update flows, on a throwaway branch that is deleted afterwards.
 // node test/live.mjs   (needs public/studio-data built, and either GH_TOKEN set to a token with Contents read/write
-// on this repo, or a sandbox proxy that attaches one; .github/workflows/live.yml runs it with the GHDASH_LIVE_TOKEN secret)
+// on this repo, or a sandbox proxy that attaches one; .github/workflows/live.yml runs it with the GITDASH_LIVE_TOKEN secret)
 import init from "@sqlite.org/sqlite-wasm";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
